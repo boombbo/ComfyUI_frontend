@@ -1,28 +1,26 @@
 <template>
-  <SidebarTabTemplate :title="$t('sideToolbar.modelLibrary')">
-    <template #tool-buttons> </template>
+  <SidebarTabTemplate
+    :title="$t('sideToolbar.modelLibrary')"
+    class="bg-[var(--p-tree-background)]"
+  >
+    <template #header>
+      <SearchBox
+        class="model-lib-search-box p-4"
+        v-model:modelValue="searchQuery"
+        :placeholder="$t('searchModels') + '...'"
+      />
+    </template>
     <template #body>
-      <div class="flex flex-col h-full">
-        <div class="flex-shrink-0">
-          <SearchBox
-            class="model-lib-search-box mx-4 mt-4"
-            v-model:modelValue="searchQuery"
-            :placeholder="$t('searchModels') + '...'"
-          />
-        </div>
-        <div class="flex-grow overflow-y-auto">
-          <TreeExplorer
-            class="model-lib-tree-explorer mt-1"
-            :roots="renderedRoot.children"
-            v-model:expandedKeys="expandedKeys"
-            @nodeClick="handleNodeClick"
-          >
-            <template #node="{ node }">
-              <ModelTreeLeaf :node="node" />
-            </template>
-          </TreeExplorer>
-        </div>
-      </div>
+      <TreeExplorer
+        class="model-lib-tree-explorer py-0"
+        :roots="renderedRoot.children"
+        v-model:expandedKeys="expandedKeys"
+        @nodeClick="handleNodeClick"
+      >
+        <template #node="{ node }">
+          <ModelTreeLeaf :node="node" />
+        </template>
+      </TreeExplorer>
     </template>
   </SidebarTabTemplate>
   <div id="model-library-model-preview-container" />
@@ -214,15 +212,9 @@ watch(
 )
 </script>
 
-<style>
-.pi-fake-spacer {
+<style scoped>
+:deep(.pi-fake-spacer) {
   height: 1px;
   width: 16px;
-}
-</style>
-
-<style scoped>
-:deep(.comfy-vue-side-bar-body) {
-  background: var(--p-tree-background);
 }
 </style>
