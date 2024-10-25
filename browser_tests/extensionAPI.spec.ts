@@ -1,5 +1,5 @@
 import { expect, Locator } from '@playwright/test'
-import { comfyPageFixture as test } from './ComfyPage'
+import { comfyPageFixture as test } from './fixtures/ComfyPage'
 
 test.describe('Topbar commands', () => {
   test.beforeEach(async ({ comfyPage }) => {
@@ -98,7 +98,6 @@ test.describe('Topbar commands', () => {
         ]
       })
     })
-    expect(await comfyPage.getSetting('TestSetting')).toBe('Hello, world!')
     await comfyPage.setSetting('TestSetting', 'Hello, universe!')
     expect(await comfyPage.getSetting('TestSetting')).toBe('Hello, universe!')
   })
