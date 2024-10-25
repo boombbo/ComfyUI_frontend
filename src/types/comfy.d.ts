@@ -3,6 +3,8 @@ import { ComfyApp } from '../scripts/app'
 import type { ComfyNodeDef } from '@/types/apiTypes'
 import type { Keybinding } from '@/types/keyBindingTypes'
 import type { ComfyCommand } from '@/stores/commandStore'
+import { SettingParams } from './settingTypes'
+import type { BottomPanelExtension } from './extensionTypes'
 
 export type Widgets = Record<
   string,
@@ -43,6 +45,14 @@ export interface ComfyExtension {
    * Menu commands to add to the menu bar
    */
   menuCommands?: MenuCommandGroup[]
+  /**
+   * Settings to add to the settings menu
+   */
+  settings?: SettingParams[]
+  /**
+   * Bottom panel tabs to add to the bottom panel
+   */
+  bottomPanelTabs?: BottomPanelExtension[]
   /**
    * Allows any initialisation, e.g. loading resources. Called after the canvas is created but before nodes are added
    * @param app The ComfyUI app instance

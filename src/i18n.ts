@@ -2,6 +2,7 @@ import { createI18n } from 'vue-i18n'
 
 const messages = {
   en: {
+    terminal: 'Terminal',
     videoFailedToLoad: 'Video failed to load',
     extensionName: 'Extension Name',
     reloadToApplyChanges: 'Reload to apply changes',
@@ -91,7 +92,8 @@ const messages = {
       refresh: 'Refresh node definitions',
       clipspace: 'Open Clipspace',
       resetView: 'Reset canvas view',
-      clear: 'Clear workflow'
+      clear: 'Clear workflow',
+      toggleBottomPanel: 'Toggle Bottom Panel'
     },
     templateWorkflows: {
       title: 'Get Started with a Template',
@@ -112,6 +114,7 @@ const messages = {
     }
   },
   zh: {
+    terminal: '终端',
     videoFailedToLoad: '视频加载失败',
     extensionName: '扩展名称',
     reloadToApplyChanges: '重新加载以应用更改',
@@ -200,7 +203,8 @@ const messages = {
       refresh: '刷新节点',
       clipspace: '打开剪贴板',
       resetView: '重置画布视图',
-      clear: '清空工作流'
+      clear: '清空工作流',
+      toggleBottomPanel: '底部面板'
     },
     templateWorkflows: {
       title: '从模板开始',
@@ -221,6 +225,7 @@ const messages = {
     }
   },
   ru: {
+    terminal: 'Терминал',
     videoFailedToLoad: 'Видео не удалось загрузить',
     extensionName: 'Название расширения',
     reloadToApplyChanges: 'Перезагрузите, чтобы применить изменения',
