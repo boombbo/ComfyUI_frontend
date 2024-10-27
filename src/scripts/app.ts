@@ -148,6 +148,8 @@ export class ComfyApp {
   canvasContainer: HTMLElement
   menu: ComfyAppMenu
   bypassBgColor: string
+  // Set by Comfy.Clipspace extension
+  openClipspace: () => void = () => {}
 
   /**
    * @deprecated Use useExecutionStore().executingNodeId instead
@@ -1425,7 +1427,6 @@ export class ComfyApp {
 
       if (color) {
         const shape =
-          // @ts-expect-error
           node._shape || node.constructor.shape || LiteGraph.ROUND_SHAPE
         ctx.lineWidth = lineWidth
         ctx.globalAlpha = 0.8
@@ -1970,7 +1971,7 @@ export class ComfyApp {
     const nodeDefArray: ComfyNodeDef[] = Object.values(allNodeDefs)
     this.#invokeExtensions('beforeRegisterVueAppNodeDefs', nodeDefArray, this)
     nodeDefStore.updateNodeDefs(nodeDefArray)
-    nodeDefStore.updateWidgets(this.widgets)
+    nodeDefStore.widgets = this.widgets
   }
 
   /**
