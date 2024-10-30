@@ -62,7 +62,9 @@ const workspaceStore = useWorkspaceStore()
 const canvasStore = useCanvasStore()
 const modelToNodeStore = useModelToNodeStore()
 const betaMenuEnabled = computed(
-  () => settingStore.get('Comfy.UseNewMenu') !== 'Disabled'
+  () =>
+    settingStore.get('Comfy.UseNewMenu') !== 'Disabled' &&
+    !workspaceStore.focusMode
 )
 const canvasMenuEnabled = computed(() =>
   settingStore.get('Comfy.Graph.CanvasMenu')
@@ -103,6 +105,14 @@ watchEffect(() => {
     textarea.focus()
     textarea.blur()
   })
+})
+
+watchEffect(() => {
+  const linkRenderMode = settingStore.get('Comfy.LinkRenderMode')
+  if (canvasStore.canvas) {
+    canvasStore.canvas.links_render_mode = linkRenderMode
+    canvasStore.canvas.setDirty(/* fg */ false, /* bg */ true)
+  }
 })
 
 watchEffect(() => {
