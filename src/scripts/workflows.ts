@@ -85,6 +85,18 @@ export class ComfyWorkflowManager extends EventTarget {
     }
   }
 
+  createTemporary(path?: string): ComfyWorkflow {
+    const workflow = new ComfyWorkflow(
+      this,
+      path ??
+        `Unsaved Workflow${
+          this.#unsavedCount++ ? ` (${this.#unsavedCount})` : ''
+        }`
+    )
+    this.workflowLookup[workflow.key] = workflow
+    return workflow
+  }
+
   /**
    * @param {string | ComfyWorkflow | null} workflow
    */
@@ -97,15 +109,8 @@ export class ComfyWorkflowManager extends EventTarget {
       }
     }
 
-    if (!(toRaw(workflow) instanceof ComfyWorkflow)) {
-      // Still not found, either reloading a deleted workflow or blank
-      workflow = new ComfyWorkflow(
-        this,
-        workflow ||
-          'Unsaved Workflow' +
-            (this.#unsavedCount++ ? ` (${this.#unsavedCount})` : '')
-      )
-      this.workflowLookup[workflow.key] = workflow
+    if (!workflow || typeof workflow === 'string') {
+      workflow = this.createTemporary(workflow)
     }
 
     if (!workflow.isOpen) {
@@ -191,13 +196,6 @@ export class ComfyWorkflow {
 
   get isBookmarked() {
     return this.manager.workflowBookmarkStore?.isBookmarked(this.path) ?? false
-  }
-
-  /**
-   * @deprecated Use isBookmarked instead
-   */
-  get isFavorite() {
-    return this.isBookmarked
   }
 
   constructor(
@@ -310,13 +308,12 @@ export class ComfyWorkflow {
       return
     }
 
-    const isFav = this.isFavorite
-    if (isFav) {
+    if (this.isBookmarked) {
       await this.favorite(false)
     }
     path = (await resp.json()).substring('workflows/'.length)
     this.updatePath(path, null)
-    if (isFav) {
+    if (this.isBookmarked) {
       await this.favorite(true)
     }
     this.manager.dispatchEvent(new CustomEvent('rename', { detail: this }))
@@ -342,7 +339,7 @@ export class ComfyWorkflow {
   async delete() {
     // TODO: fix delete of current workflow - should mark workflow as unsaved and when saving use old name by default
 
-    if (this.isFavorite) {
+    if (this.isBookmarked) {
       await this.favorite(false)
     }
     const resp = await api.deleteUserData('workflows/' + this.path)
