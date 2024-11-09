@@ -27,6 +27,7 @@ import { ComfyAppMenu } from './ui/menu/index'
 import { getStorageValue } from './utils'
 import { ComfyWorkflow } from '@/stores/workflowStore'
 import {
+  LGraphGroup,
   LGraphCanvas,
   LGraph,
   LGraphNode,
@@ -2964,7 +2965,7 @@ export class ComfyApp {
   public goToNode(nodeId: NodeId) {
     const graphNode = this.graph.getNodeById(nodeId)
     if (!graphNode) return
-    this.canvas.animateToNode(graphNode)
+    this.canvas.animateToBounds(graphNode.boundingRect)
   }
 }
 

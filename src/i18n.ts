@@ -2,8 +2,6 @@ import { createI18n } from 'vue-i18n'
 
 const messages = {
   en: {
-    firstTimeUIMessage:
-      'This is the first time you use the new UI. Choose "Menu > Use New Menu > Disabled" to restore the old UI.',
     download: 'Download',
     loadAllFolders: 'Load All Folders',
     refresh: 'Refresh',
@@ -115,14 +113,18 @@ const messages = {
       zoomIn: 'Zoom In',
       zoomOut: 'Zoom Out',
       resetView: 'Reset View',
+      fitView: 'Fit View',
       selectMode: 'Select Mode',
       panMode: 'Pan Mode',
       toggleLinkVisibility: 'Toggle Link Visibility'
+    },
+    electronFileDownload: {
+      pause: 'Pause Download',
+      resume: 'Resume Download',
+      cancel: 'Cancel Download'
     }
   },
   zh: {
-    firstTimeUIMessage:
-      '这是您第一次使用新界面。选择“Menu > Use New Menu > Disabled”以恢复旧界面。',
     download: '下载',
     loadAllFolders: '加载所有文件夹',
     refresh: '刷新',
@@ -233,6 +235,7 @@ const messages = {
       zoomIn: '放大',
       zoomOut: '缩小',
       resetView: '重置视图',
+      fitView: '适应视图',
       selectMode: '选择模式',
       panMode: '平移模式',
       toggleLinkVisibility: '切换链接可见性'
@@ -352,6 +355,7 @@ const messages = {
       zoomIn: 'Увеличить',
       zoomOut: 'Уменьшить',
       resetView: 'Сбросить вид',
+      fitView: 'Подгонять под выделенные',
       selectMode: 'Выбрать режим',
       panMode: 'Режим панорамирования',
       toggleLinkVisibility: 'Переключить видимость ссылок'
