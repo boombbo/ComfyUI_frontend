@@ -36,7 +36,6 @@ import {
   LGraphNode,
   LiteGraph
 } from '@comfyorg/litegraph'
-import { StorageLocation } from '@/types/settingTypes'
 import { ExtensionManager } from '@/types/extensionTypes'
 import {
   ComfyNodeDefImpl,
@@ -143,8 +142,6 @@ export class ComfyApp {
   lastExecutionError: { node_id: number } | null
   progress: { value: number; max: number } | null
   configuringGraph: boolean
-  isNewUserSession: boolean
-  storageLocation: StorageLocation
   ctx: CanvasRenderingContext2D
   bodyTop: HTMLElement
   bodyLeft: HTMLElement
@@ -178,6 +175,21 @@ export class ComfyApp {
       return useWidgetStore().widgets
     }
     return ComfyWidgets
+  }
+
+  /**
+   * @deprecated storageLocation is always 'server' since
+   * https://github.com/comfyanonymous/ComfyUI/commit/53c8a99e6c00b5e20425100f6680cd9ea2652218
+   */
+  get storageLocation() {
+    return 'server'
+  }
+
+  /**
+   * @deprecated storage migration is no longer needed.
+   */
+  get isNewUserSession() {
+    return false
   }
 
   constructor() {
@@ -1699,31 +1711,10 @@ export class ComfyApp {
     )
   }
 
-  async #migrateSettings() {
-    this.isNewUserSession = true
-    // Store all current settings
-    const settings = Object.keys(this.ui.settings).reduce((p, n) => {
-      const v = localStorage[`Comfy.Settings.${n}`]
-      if (v) {
-        try {
-          p[n] = JSON.parse(v)
-        } catch (error) {}
-      }
-      return p
-    }, {})
-
-    await api.storeSettings(settings)
-  }
-
   async #setUser() {
     const userConfig = await api.getUserConfig()
-    this.storageLocation = userConfig.storage
-    if (typeof userConfig.migrated == 'boolean') {
-      // Single user mode migrated true/false for if the default user is created
-      if (!userConfig.migrated && this.storageLocation === 'server') {
-        // Default user not created yet
-        await this.#migrateSettings()
-      }
+    // Return in single user mode.
+    if (userConfig.users === undefined) {
       return
     }
 
@@ -1737,18 +1728,15 @@ export class ComfyApp {
       const { UserSelectionScreen } = await import('./ui/userSelection')
 
       this.ui.menuContainer.style.display = 'none'
-      const { userId, username, created } =
-        await new UserSelectionScreen().show(users, user)
+      const { userId, username } = await new UserSelectionScreen().show(
+        users,
+        user
+      )
       this.ui.menuContainer.style.display = ''
 
       user = userId
       localStorage['Comfy.userName'] = username
       localStorage['Comfy.userId'] = user
-
-      if (created) {
-        api.user = user
-        await this.#migrateSettings()
-      }
     }
 
     api.user = user

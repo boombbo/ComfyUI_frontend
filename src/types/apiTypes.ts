@@ -430,7 +430,7 @@ export const zSystemStats = z.object({
   devices: z.array(zDeviceStats)
 })
 const zUser = z.object({
-  storage: z.enum(['server', 'browser']),
+  storage: z.enum(['server']),
   migrated: z.boolean(),
   users: z.record(z.string(), z.unknown())
 })
@@ -521,7 +521,8 @@ const zSettings = z.record(z.any()).and(
       'Comfy.Node.AutoSnapLinkToSlot': z.boolean(),
       'Comfy.Node.SnapHighlightsNode': z.boolean(),
       'Comfy.Server.ServerConfigValues': z.record(z.string(), z.any()),
-      'Comfy.Server.LaunchArgs': z.record(z.string(), z.string())
+      'Comfy.Server.LaunchArgs': z.record(z.string(), z.string()),
+      'LiteGraph.Canvas.MaximumFps': z.number()
     })
     .optional()
 )
