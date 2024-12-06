@@ -181,6 +181,7 @@
     "Toggle Focus Mode": "切换专注模式",
     "Toggle Link Visibility": "切换链接可见性",
     "Toggle Lock": "切换锁定",
+    "Toggle Search Box": "切换搜索框",
     "Toggle Theme": "切换主题",
     "Undo": "撤销",
     "Ungroup selected group nodes": "取消选定组节点的分组",
@@ -196,6 +197,8 @@
   "noTasksFoundMessage": "队列中没有任务。",
   "noWorkflowsFound": "未找到工作流",
   "notSupported": {
+    "continue": "继续",
+    "continueTooltip": "我确定我的设备是受支持的",
     "learnMore": "了解更多",
     "message": "仅支持以下设备：",
     "reportIssue": "报告问题",

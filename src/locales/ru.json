@@ -181,6 +181,7 @@
     "Toggle Focus Mode": "Переключить режим фокуса",
     "Toggle Link Visibility": "Переключить видимость ссылок",
     "Toggle Lock": "Переключить блокировку",
+    "Toggle Search Box": "Переключить поисковую панель",
     "Toggle Theme": "Переключить тему",
     "Undo": "Отменить",
     "Ungroup selected group nodes": "Разгруппировать выбранные групповые узлы",
@@ -196,6 +197,8 @@
   "noTasksFoundMessage": "В очереди нет задач.",
   "noWorkflowsFound": "Рабочие процессы не найдены.",
   "notSupported": {
+    "continue": "Продолжить",
+    "continueTooltip": "Я уверен, что мое устройство поддерживается",
     "learnMore": "Узнать больше",
     "message": "Поддерживаются только следующие устройства:",
     "reportIssue": "Сообщить о проблеме",
