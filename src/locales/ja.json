@@ -5,6 +5,7 @@
   "box": "ボックス",
   "briefcase": "ブリーフケース",
   "cancel": "キャンセル",
+  "close": "閉じる",
   "color": "色",
   "comingSoon": "近日公開",
   "confirm": "確認",
@@ -1517,7 +1518,12 @@
       "deleteFailedTitle": "削除に失敗しました",
       "deleted": "ワークフローが削除されました",
       "dirtyClose": "以下のファイルが変更されました。閉じる前に保存しますか？",
-      "dirtyCloseTitle": "変更を保存しますか？"
+      "dirtyCloseTitle": "変更を保存しますか？",
+      "workflowTreeType": {
+        "bookmarks": "ブックマーク",
+        "browse": "ブラウズ",
+        "open": "開く"
+      }
     },
     "workflows": "ワークフロー"
   },

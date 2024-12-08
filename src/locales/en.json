@@ -136,6 +136,7 @@
   "save": "Save",
   "no": "No",
   "cancel": "Cancel",
+  "close": "Close",
   "overwrite": "Overwrite",
   "customize": "Customize",
   "experimental": "BETA",
@@ -473,7 +474,12 @@
       "dirtyCloseTitle": "Save Changes?",
       "dirtyClose": "The files below have been changed.  Would you like to save them before closing?",
       "confirmOverwriteTitle": "Overwrite existing file?",
-      "confirmOverwrite": "The file below already exists. Would you like to overwrite it?"
+      "confirmOverwrite": "The file below already exists. Would you like to overwrite it?",
+      "workflowTreeType": {
+        "browse": "Browse",
+        "bookmarks": "Bookmarks",
+        "open": "Open"
+      }
     }
   },
   "menu": {
@@ -598,7 +604,7 @@
   },
   "desktopMenu": {
     "reinstall": "Reinstall",
-    "confirmReinstall": "This will clear your extra_models_config.yaml file, and begin installation again.  Are you sure?"
+    "confirmReinstall": "This will clear your extra_models_config.yaml file,\nand begin installation again.\n\nAre you sure?"
   },
   "settingsCategories": {
     "Comfy-Desktop": "Comfy-Desktop",
