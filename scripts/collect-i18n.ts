@@ -52,7 +52,8 @@ test('collect-i18n', async ({ comfyPage }) => {
         id: setting.id,
         name: setting.name,
         tooltip: setting.tooltip,
-        category: setting.category
+        category: setting.category,
+        options: setting.options
       }))
   })
 
@@ -61,7 +62,19 @@ test('collect-i18n', async ({ comfyPage }) => {
       normalizeI18nKey(setting.id),
       {
         name: setting.name,
-        tooltip: setting.tooltip
+        tooltip: setting.tooltip,
+        // Don't translate the locale options as each option is in its own language.
+        // e.g. "English", "中文", "Русский", "日本語", "한국어"
+        options:
+          setting.options && setting.id !== 'Comfy.Locale'
+            ? Object.fromEntries(
+                setting.options.map((option) => {
+                  const optionLabel =
+                    typeof option === 'string' ? option : option.text
+                  return [normalizeI18nKey(optionLabel), optionLabel]
+                })
+              )
+            : undefined
       }
     ])
   )
@@ -123,6 +136,33 @@ test('collect-i18n', async ({ comfyPage }) => {
     )
   )
 
+  const allDataTypesLocale = Object.fromEntries(
+    Object.values(nodeDefs).flatMap((nodeDef) => {
+      const inputs = nodeDef.input ?? {}
+      const requiredInputs = inputs.required ?? {}
+      const optionalInputs = inputs.optional ?? {}
+      const allInputs = {
+        ...requiredInputs,
+        ...optionalInputs
+      }
+
+      const inputDataTypes = Object.values(allInputs).map((inputSpec) => {
+        const typeRaw = inputSpec[0]
+        const type = Array.isArray(typeRaw) ? 'COMBO' : typeRaw
+        return type
+      })
+      const outputDataTypes = nodeDef.output ?? []
+      const allDataTypes = [...inputDataTypes, ...outputDataTypes].flatMap(
+        (type: string) => type.split(',')
+      )
+
+      return allDataTypes.map((dataType) => [
+        normalizeI18nKey(dataType),
+        dataType
+      ])
+    })
+  )
+
   fs.writeFileSync(
     localePath,
     JSON.stringify(
@@ -139,6 +179,7 @@ test('collect-i18n', async ({ comfyPage }) => {
         serverConfigItems: allServerConfigsLocale,
         serverConfigCategories: allServerConfigCategoriesLocale,
         nodeDefs: allNodeDefsLocale,
+        dataTypes: allDataTypesLocale,
         nodeCategories: allNodeCategoriesLocale
       },
       null,
