@@ -77,8 +77,10 @@
     "delete": "삭제",
     "deprecated": "사용 중단",
     "devices": "장치",
+    "disableAll": "모두 비활성화",
     "download": "다운로드",
     "empty": "비어 있음",
+    "enableAll": "모두 활성화",
     "error": "오류",
     "experimental": "베타",
     "extensionName": "확장 이름",
@@ -235,6 +237,7 @@
     "toggleBottomPanel": "하단 패널 전환"
   },
   "menuLabels": {
+    "About ComfyUI": "ComfyUI에 대하여",
     "Browse Templates": "템플릿 탐색",
     "Bypass/Unbypass Selected Nodes": "선택한 노드 우회/우회 해제",
     "Canvas Toggle Link Visibility": "캔버스 토글 링크 가시성",

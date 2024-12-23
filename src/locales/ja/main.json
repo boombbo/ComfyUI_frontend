@@ -77,8 +77,10 @@
     "delete": "削除",
     "deprecated": "非推奨",
     "devices": "デバイス",
+    "disableAll": "すべて無効にする",
     "download": "ダウンロード",
     "empty": "空",
+    "enableAll": "すべて有効にする",
     "error": "エラー",
     "experimental": "ベータ",
     "extensionName": "拡張機能名",
@@ -235,6 +237,7 @@
     "toggleBottomPanel": "下部パネルを切り替え"
   },
   "menuLabels": {
+    "About ComfyUI": "ComfyUIについて",
     "Browse Templates": "テンプレートを参照",
     "Bypass/Unbypass Selected Nodes": "選択したノードのバイパス/バイパス解除",
     "Canvas Toggle Link Visibility": "キャンバスのリンク表示を切り替え",
