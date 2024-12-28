@@ -175,7 +175,6 @@ body {
   display: none;
 }
 
-
 .comfy-markdown .tiptap :first-child {
   margin-top: 0;
 }
@@ -195,6 +194,21 @@ body {
   border-radius: 0.5em;
   margin: 0.5em;
   padding: 0.5em;
+}
+
+.comfy-markdown .tiptap table {
+  border-collapse: collapse;
+}
+
+.comfy-markdown .tiptap th {
+  text-align: left;
+  background: var(--comfy-menu-bg);
+}
+
+.comfy-markdown .tiptap th,
+.comfy-markdown .tiptap td {
+  padding: 0.5em;
+  border: thin solid;
 }
 
 .comfy-modal {
@@ -635,16 +649,12 @@ dialog::backdrop {
 .litegraph.litecontextmenu.dark {
   z-index: 9999 !important;
   background-color: var(--comfy-menu-bg) !important;
-  filter: brightness(95%);
-  will-change: transform;
 }
 
 .litegraph.litecontextmenu
   .litemenu-entry:hover:not(.disabled):not(.separator) {
-  background-color: var(--comfy-menu-bg) !important;
-  filter: brightness(155%);
-  will-change: transform;
-  color: var(--input-text);
+  background-color: var(--comfy-menu-hover-bg, var(--border-color)) !important;
+  color: var(--fg-color);
 }
 
 .litegraph.litecontextmenu .litemenu-entry.submenu,
