@@ -764,3 +764,17 @@ audio.comfy-audio.empty-audio-widget {
 .p-tree-node-content {
   padding: var(--comfy-tree-explorer-item-padding) !important;
 }
+
+/* [Desktop] Electron window specific styles */
+.app-drag {
+  app-region: drag;
+}
+
+.no-drag {
+  app-region: no-drag;
+}
+
+.window-actions-spacer {
+  width: calc(100vw - env(titlebar-area-width, 100vw));
+}
+/* End of [Desktop] Electron window specific styles */
