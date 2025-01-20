@@ -9,6 +9,7 @@ import {
   DEFAULT_DARK_COLOR_PALETTE,
   DEFAULT_LIGHT_COLOR_PALETTE
 } from '@/constants/coreColorPalettes'
+import { t } from '@/i18n'
 import { api } from '@/scripts/api'
 import { app } from '@/scripts/app'
 import { useDialogService } from '@/services/dialogService'
@@ -537,6 +538,22 @@ export function useCoreCommands(): ComfyCommand[] {
       function: () => {
         if (workflowStore.activeWorkflow)
           workflowService.closeWorkflow(workflowStore.activeWorkflow)
+      }
+    },
+    {
+      id: 'Comfy.Feedback',
+      icon: 'pi pi-megaphone',
+      label: 'Give Feedback',
+      versionAdded: '1.8.2',
+      function: () => {
+        dialogService.showIssueReportDialog({
+          title: t('g.feedback'),
+          panelProps: {
+            errorType: 'Feedback',
+            title: t('issueReport.feedbackTitle'),
+            defaultFields: ['SystemStats', 'Settings']
+          }
+        })
       }
     }
   ]
