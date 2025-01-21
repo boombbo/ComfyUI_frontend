@@ -255,7 +255,11 @@
     "rating": "평가",
     "stackTrace": "스택 추적",
     "submitErrorReport": "오류 보고서 제출 (선택 사항)",
-    "systemStats": "시스템 통계"
+    "systemStats": "시스템 통계",
+    "validation": {
+      "invalidEmail": "유효한 이메일 주소를 입력해 주세요",
+      "maxLength": "메시지가 너무 깁니다"
+    }
   },
   "menu": {
     "autoQueue": "자동 실행 큐",
@@ -292,8 +296,8 @@
     "Close Current Workflow": "현재 워크플로 닫기",
     "Collapse/Expand Selected Nodes": "선택한 노드 축소/확장",
     "Comfy-Org Discord": "Comfy-Org 디스코드",
-    "Comfy-Org Forum": "Comfy-Org 포럼",
     "ComfyUI Docs": "ComfyUI 문서",
+    "ComfyUI Forum": "ComfyUI 포럼",
     "ComfyUI Issues": "ComfyUI 이슈 페이지",
     "Convert selected nodes to group node": "선택한 노드를 그룹 노드로 변환",
     "Desktop User Guide": "데스크톱 사용자 가이드",
