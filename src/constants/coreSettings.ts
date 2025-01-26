@@ -157,7 +157,7 @@ export const CORE_SETTINGS: SettingParams[] = [
     id: 'Comfy.Workflow.ShowMissingModelsWarning',
     name: 'Show missing models warning',
     type: 'boolean',
-    defaultValue: false,
+    defaultValue: true,
     experimental: true
   },
   {
@@ -708,5 +708,12 @@ export const CORE_SETTINGS: SettingParams[] = [
     defaultValue: 'after',
     options: ['before', 'after'],
     versionModified: '1.6.10'
+  },
+  {
+    id: 'Comfy.TutorialCompleted',
+    name: 'Tutorial completed',
+    type: 'hidden',
+    defaultValue: false,
+    versionAdded: '1.8.7'
   }
 ]

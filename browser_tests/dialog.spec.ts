@@ -1,4 +1,4 @@
-import { expect } from '@playwright/test'
+import { Locator, expect } from '@playwright/test'
 
 import { Keybinding } from '../src/types/keyBindingTypes'
 import { comfyPageFixture as test } from './fixtures/ComfyPage'
@@ -120,6 +120,14 @@ test.describe('Missing models warning', () => {
     await expect(missingModelsWarning).not.toBeVisible()
   })
 
+  test('should show on tutorial workflow', async ({ comfyPage }) => {
+    await comfyPage.setSetting('Comfy.TutorialCompleted', false)
+    await comfyPage.setup({ clearStorage: true })
+    const missingModelsWarning = comfyPage.page.locator('.comfy-missing-models')
+    await expect(missingModelsWarning).toBeVisible()
+    expect(await comfyPage.getSetting('Comfy.TutorialCompleted')).toBe(true)
+  })
+
   // Flaky test after parallelization
   // https://github.com/Comfy-Org/ComfyUI_frontend/pull/1400
   test.skip('Should download missing model when clicking download button', async ({
@@ -139,6 +147,49 @@ test.describe('Missing models warning', () => {
 
     const download = await downloadPromise
     expect(download.suggestedFilename()).toBe('fake_model.safetensors')
+  })
+
+  test.describe('Do not show again checkbox', () => {
+    let checkbox: Locator
+    let closeButton: Locator
+
+    test.beforeEach(async ({ comfyPage }) => {
+      await comfyPage.setSetting(
+        'Comfy.Workflow.ShowMissingModelsWarning',
+        true
+      )
+      await comfyPage.loadWorkflow('missing_models')
+
+      checkbox = comfyPage.page.getByLabel("Don't show this again")
+      closeButton = comfyPage.page.getByLabel('Close')
+    })
+
+    test('Should disable warning dialog when checkbox is checked', async ({
+      comfyPage
+    }) => {
+      await checkbox.click()
+      const changeSettingPromise = comfyPage.page.waitForRequest(
+        '**/api/settings/Comfy.Workflow.ShowMissingModelsWarning'
+      )
+      await closeButton.click()
+      await changeSettingPromise
+
+      const settingValue = await comfyPage.getSetting(
+        'Comfy.Workflow.ShowMissingModelsWarning'
+      )
+      expect(settingValue).toBe(false)
+    })
+
+    test('Should keep warning dialog enabled when checkbox is unchecked', async ({
+      comfyPage
+    }) => {
+      await closeButton.click()
+
+      const settingValue = await comfyPage.getSetting(
+        'Comfy.Workflow.ShowMissingModelsWarning'
+      )
+      expect(settingValue).toBe(true)
+    })
   })
 })
 

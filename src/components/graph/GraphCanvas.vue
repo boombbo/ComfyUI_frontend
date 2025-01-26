@@ -54,11 +54,11 @@ import SideToolbar from '@/components/sidebar/SideToolbar.vue'
 import SecondRowWorkflowTabs from '@/components/topbar/SecondRowWorkflowTabs.vue'
 import { CORE_SETTINGS } from '@/constants/coreSettings'
 import { usePragmaticDroppable } from '@/hooks/dndHooks'
+import { useWorkflowPersistence } from '@/hooks/workflowPersistenceHooks'
 import { i18n } from '@/i18n'
 import { api } from '@/scripts/api'
 import { app as comfyApp } from '@/scripts/app'
 import { ChangeTracker } from '@/scripts/changeTracker'
-import { getStorageValue, setStorageValue } from '@/scripts/utils'
 import { IS_CONTROL_WIDGET, updateControlWidgetLabel } from '@/scripts/widgets'
 import { useColorPaletteService } from '@/services/colorPaletteService'
 import { useLitegraphService } from '@/services/litegraphService'
@@ -72,7 +72,6 @@ import {
 } from '@/stores/modelToNodeStore'
 import { ComfyNodeDefImpl, useNodeDefStore } from '@/stores/nodeDefStore'
 import { useSettingStore } from '@/stores/settingStore'
-import { useWorkflowStore } from '@/stores/workflowStore'
 import { useColorPaletteStore } from '@/stores/workspace/colorPaletteStore'
 import { useWorkspaceStore } from '@/stores/workspaceStore'
 import type { RenderedTreeExplorerNode } from '@/types/treeExplorerTypes'
@@ -95,29 +94,6 @@ const canvasMenuEnabled = computed(() =>
   settingStore.get('Comfy.Graph.CanvasMenu')
 )
 const tooltipEnabled = computed(() => settingStore.get('Comfy.EnableTooltips'))
-
-const storedWorkflows = JSON.parse(
-  getStorageValue('Comfy.OpenWorkflowsPaths') || '[]'
-)
-const storedActiveIndex = JSON.parse(
-  getStorageValue('Comfy.ActiveWorkflowIndex') || '-1'
-)
-const openWorkflows = computed(() => workspaceStore?.workflow?.openWorkflows)
-const activeWorkflow = computed(() => workspaceStore?.workflow?.activeWorkflow)
-const restoreState = computed<{ paths: string[]; activeIndex: number }>(() => {
-  if (!openWorkflows.value || !activeWorkflow.value) {
-    return { paths: [], activeIndex: -1 }
-  }
-
-  const paths = openWorkflows.value
-    .filter((workflow) => workflow?.isPersisted && !workflow.isModified)
-    .map((workflow) => workflow.path)
-  const activeIndex = openWorkflows.value.findIndex(
-    (workflow) => workflow.path === activeWorkflow.value?.path
-  )
-
-  return { paths, activeIndex }
-})
 
 watchEffect(() => {
   const canvasInfoEnabled = settingStore.get('Comfy.Graph.CanvasInfo')
@@ -270,27 +246,6 @@ watch(
   }
 )
 
-const workflowStore = useWorkflowStore()
-const persistCurrentWorkflow = () => {
-  const workflow = JSON.stringify(comfyApp.serializeGraph())
-  localStorage.setItem('workflow', workflow)
-  if (api.clientId) {
-    sessionStorage.setItem(`workflow:${api.clientId}`, workflow)
-  }
-}
-
-watchEffect(() => {
-  if (workflowStore.activeWorkflow) {
-    const workflow = workflowStore.activeWorkflow
-    setStorageValue('Comfy.PreviousWorkflow', workflow.key)
-    // When the activeWorkflow changes, the graph has already been loaded.
-    // Saving the current state of the graph to the localStorage.
-    persistCurrentWorkflow()
-  }
-})
-
-api.addEventListener('graphChanged', persistCurrentWorkflow)
-
 usePragmaticDroppable(() => canvasRef.value, {
   onDrop: (event) => {
     const loc = event.location.current.input
@@ -361,6 +316,8 @@ const loadCustomNodesI18n = async () => {
 }
 
 const comfyAppReady = ref(false)
+const workflowPersistence = useWorkflowPersistence()
+
 onMounted(async () => {
   // Backward compatible
   // Assign all properties of lg to window
@@ -400,17 +357,9 @@ onMounted(async () => {
     'Comfy.CustomColorPalettes'
   )
 
-  const isRestorable = storedWorkflows?.length > 0 && storedActiveIndex >= 0
-  if (isRestorable)
-    workflowStore.openWorkflowsInBackground({
-      left: storedWorkflows.slice(0, storedActiveIndex),
-      right: storedWorkflows.slice(storedActiveIndex)
-    })
-
-  watch(restoreState, ({ paths, activeIndex }) => {
-    setStorageValue('Comfy.OpenWorkflowsPaths', JSON.stringify(paths))
-    setStorageValue('Comfy.ActiveWorkflowIndex', JSON.stringify(activeIndex))
-  })
+  // Restore workflow and workflow tabs state from storage
+  await workflowPersistence.restorePreviousWorkflow()
+  workflowPersistence.restoreWorkflowTabsState()
 
   // Start watching for locale change after the initial value is loaded.
   watch(
