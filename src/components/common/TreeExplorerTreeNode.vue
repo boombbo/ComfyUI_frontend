@@ -27,13 +27,16 @@
         class="leaf-count-badge"
       />
     </div>
-    <div class="node-actions">
+    <div
+      class="node-actions motion-safe:opacity-0 motion-safe:group-hover/tree-node:opacity-100"
+    >
       <slot name="actions" :node="props.node"></slot>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
+import { setCustomNativeDragPreview } from '@atlaskit/pragmatic-drag-and-drop/element/set-custom-native-drag-preview'
 import Badge from 'primevue/badge'
 import { Ref, computed, inject, ref } from 'vue'
 
@@ -102,7 +105,17 @@ if (props.node.draggable) {
       }
     },
     onDragStart: () => emit('dragStart', props.node),
-    onDrop: () => emit('dragEnd', props.node)
+    onDrop: () => emit('dragEnd', props.node),
+    onGenerateDragPreview: props.node.renderDragPreview
+      ? ({ nativeSetDragImage }) => {
+          setCustomNativeDragPreview({
+            render: ({ container }) => {
+              return props.node.renderDragPreview(props.node, container)
+            },
+            nativeSetDragImage
+          })
+        }
+      : undefined
   })
 }
 
