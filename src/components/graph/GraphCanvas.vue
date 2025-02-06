@@ -41,10 +41,11 @@ import TitleEditor from '@/components/graph/TitleEditor.vue'
 import NodeSearchboxPopover from '@/components/searchbox/NodeSearchBoxPopover.vue'
 import SideToolbar from '@/components/sidebar/SideToolbar.vue'
 import SecondRowWorkflowTabs from '@/components/topbar/SecondRowWorkflowTabs.vue'
+import { useCanvasDrop } from '@/composables/useCanvasDrop'
+import { useContextMenuTranslation } from '@/composables/useContextMenuTranslation'
+import { useGlobalLitegraph } from '@/composables/useGlobalLitegraph'
+import { useWorkflowPersistence } from '@/composables/useWorkflowPersistence'
 import { CORE_SETTINGS } from '@/constants/coreSettings'
-import { useCanvasDrop } from '@/hooks/canvasDropHooks'
-import { useGlobalLitegraph } from '@/hooks/litegraphHooks'
-import { useWorkflowPersistence } from '@/hooks/workflowPersistenceHooks'
 import { i18n } from '@/i18n'
 import { api } from '@/scripts/api'
 import { app as comfyApp } from '@/scripts/app'
@@ -261,6 +262,8 @@ useCanvasDrop(canvasRef)
 
 onMounted(async () => {
   useGlobalLitegraph()
+  useContextMenuTranslation()
+
   comfyApp.vueAppReady = true
 
   workspaceStore.spinner = true

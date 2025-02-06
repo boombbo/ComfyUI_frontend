@@ -75,7 +75,7 @@ import NodePreview from '@/components/node/NodePreview.vue'
 import NodeSearchFilter from '@/components/searchbox/NodeSearchFilter.vue'
 import SidebarTabTemplate from '@/components/sidebar/tabs/SidebarTabTemplate.vue'
 import NodeTreeLeaf from '@/components/sidebar/tabs/nodeLibrary/NodeTreeLeaf.vue'
-import { useTreeExpansion } from '@/hooks/treeHooks'
+import { useTreeExpansion } from '@/composables/useTreeExpansion'
 import { useLitegraphService } from '@/services/litegraphService'
 import { FilterAndValue } from '@/services/nodeSearchService'
 import { useNodeBookmarkStore } from '@/stores/nodeBookmarkStore'
@@ -84,10 +84,7 @@ import {
   buildNodeDefTree,
   useNodeDefStore
 } from '@/stores/nodeDefStore'
-import type {
-  RenderedTreeExplorerNode,
-  TreeExplorerNode
-} from '@/types/treeExplorerTypes'
+import type { TreeExplorerNode } from '@/types/treeExplorerTypes'
 import { sortedTree } from '@/utils/treeUtil'
 
 import NodeBookmarkTreeExplorer from './nodeLibrary/NodeBookmarkTreeExplorer.vue'
@@ -119,28 +116,25 @@ const renderedRoot = computed<TreeExplorerNode<ComfyNodeDefImpl>>(() => {
       label: node.leaf ? node.data.display_name : node.label,
       leaf: node.leaf,
       data: node.data,
-      getIcon: (node: TreeExplorerNode<ComfyNodeDefImpl>) => {
-        if (node.leaf) {
+      getIcon() {
+        if (this.leaf) {
           return 'pi pi-circle-fill'
         }
       },
       children,
       draggable: node.leaf,
-      renderDragPreview: (node, container) => {
+      renderDragPreview(container) {
         const vnode = h(NodePreview, { nodeDef: node.data })
         render(vnode, container)
         return () => {
           render(null, container)
         }
       },
-      handleClick: (
-        node: RenderedTreeExplorerNode<ComfyNodeDefImpl>,
-        e: MouseEvent
-      ) => {
-        if (node.leaf) {
-          useLitegraphService().addNodeOnGraph(node.data)
+      handleClick(e: MouseEvent) {
+        if (this.leaf) {
+          useLitegraphService().addNodeOnGraph(this.data)
         } else {
-          toggleNodeOnEvent(e, node)
+          toggleNodeOnEvent(e, this)
         }
       }
     }

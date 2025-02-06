@@ -41,8 +41,11 @@ import Badge from 'primevue/badge'
 import { Ref, computed, inject, ref } from 'vue'
 
 import EditableText from '@/components/common/EditableText.vue'
-import { usePragmaticDraggable, usePragmaticDroppable } from '@/hooks/dndHooks'
-import { useErrorHandling } from '@/hooks/errorHooks'
+import { useErrorHandling } from '@/composables/useErrorHandling'
+import {
+  usePragmaticDraggable,
+  usePragmaticDroppable
+} from '@/composables/usePragmaticDragAndDrop'
 import type {
   RenderedTreeExplorerNode,
   TreeExplorerDragAndDropData,
@@ -83,7 +86,7 @@ const isEditing = computed(
 const errorHandling = useErrorHandling()
 const handleRename = errorHandling.wrapWithErrorHandlingAsync(
   async (newName: string) => {
-    await props.node.handleRename(props.node, newName)
+    await props.node.handleRename(newName)
   },
   props.node.handleError,
   () => {
@@ -110,7 +113,7 @@ if (props.node.draggable) {
       ? ({ nativeSetDragImage }) => {
           setCustomNativeDragPreview({
             render: ({ container }) => {
-              return props.node.renderDragPreview(props.node, container)
+              return props.node.renderDragPreview(container)
             },
             nativeSetDragImage
           })
@@ -124,7 +127,7 @@ if (props.node.droppable) {
     onDrop: async (event) => {
       const dndData = event.source.data as TreeExplorerDragAndDropData
       if (dndData.type === 'tree-explorer-node') {
-        await props.node.handleDrop?.(props.node, dndData)
+        await props.node.handleDrop?.(dndData)
         canDrop.value = false
         emit('itemDropped', props.node, dndData.data)
       }
