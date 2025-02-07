@@ -1,4 +1,9 @@
 {
+  "clipboard": {
+    "errorMessage": "Échec de la copie dans le presse-papiers",
+    "errorNotSupported": "L'API du presse-papiers n'est pas prise en charge par votre navigateur",
+    "successMessage": "Copié dans le presse-papiers"
+  },
   "color": {
     "blue": "Bleu",
     "custom": "Personnalisé",
@@ -80,6 +85,11 @@
     "confirmReinstall": "Cela effacera votre fichier extra_models_config.yaml,\net commencera l'installation à nouveau.\n\nÊtes-vous sûr ?",
     "quit": "Quitter",
     "reinstall": "Réinstaller"
+  },
+  "desktopUpdate": {
+    "description": "ComfyUI Desktop installe de nouvelles dépendances. Cela peut prendre quelques minutes.",
+    "terminalDefaultMessage": "Toute sortie de console de la mise à jour sera affichée ici.",
+    "title": "Mise à jour de ComfyUI Desktop"
   },
   "downloadGit": {
     "gitWebsite": "Télécharger git",

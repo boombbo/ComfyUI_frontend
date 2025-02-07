@@ -1,4 +1,9 @@
 {
+  "clipboard": {
+    "errorMessage": "クリップボードへのコピーに失敗しました",
+    "errorNotSupported": "お使いのブラウザではクリップボードAPIがサポートされていません",
+    "successMessage": "クリップボードにコピーしました"
+  },
   "color": {
     "blue": "青",
     "custom": "カスタム",
@@ -80,6 +85,11 @@
     "confirmReinstall": "これにより、extra_models_config.yamlファイルがクリアされ、再インストールが開始されます。本当によろしいですか？",
     "quit": "終了",
     "reinstall": "再インストール"
+  },
+  "desktopUpdate": {
+    "description": "ComfyUIデスクトップは新しい依存関係をインストールしています。これには数分かかる場合があります。",
+    "terminalDefaultMessage": "更新からの任意のコンソール出力はここに表示されます。",
+    "title": "ComfyUIデスクトップの更新"
   },
   "downloadGit": {
     "gitWebsite": "Gitをダウンロード",

@@ -1,4 +1,9 @@
 {
+  "clipboard": {
+    "errorMessage": "Не удалось скопировать в буфер обмена",
+    "errorNotSupported": "API буфера обмена не поддерживается в вашем браузере",
+    "successMessage": "Скопировано в буфер обмена"
+  },
   "color": {
     "blue": "Синий",
     "custom": "Пользовательский",
@@ -80,6 +85,11 @@
     "confirmReinstall": "Это очистит ваш файл extra_models_config.yaml и начнёт установку заново. Вы уверены?",
     "quit": "Выйти",
     "reinstall": "Переустановить"
+  },
+  "desktopUpdate": {
+    "description": "ComfyUI Desktop устанавливает новые зависимости. Это может занять несколько минут.",
+    "terminalDefaultMessage": "Любой вывод консоли из обновления будет отображаться здесь.",
+    "title": "Обновление ComfyUI Desktop"
   },
   "downloadGit": {
     "gitWebsite": "Скачать git",

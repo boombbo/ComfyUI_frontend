@@ -1,4 +1,9 @@
 {
+  "clipboard": {
+    "errorMessage": "复制到剪贴板失败",
+    "errorNotSupported": "您的浏览器不支持剪贴板API",
+    "successMessage": "已复制到剪贴板"
+  },
   "color": {
     "blue": "蓝色",
     "custom": "自定义",
@@ -80,6 +85,11 @@
     "confirmReinstall": "这将清除您的 extra_models_config.yaml 文件，并重新开始安装。您确定吗？",
     "quit": "退出",
     "reinstall": "重新安装"
+  },
+  "desktopUpdate": {
+    "description": "ComfyUI桌面正在安装新的依赖项。这可能需要几分钟的时间。",
+    "terminalDefaultMessage": "更新过程中的任何控制台输出都将在这里显示。",
+    "title": "正在更新ComfyUI桌面"
   },
   "downloadGit": {
     "gitWebsite": "下载 git",

@@ -29,7 +29,6 @@
 </template>
 
 <script setup lang="ts">
-import { CanvasPointer, LGraphNode, LiteGraph } from '@comfyorg/litegraph'
 import { computed, onMounted, ref, watch, watchEffect } from 'vue'
 
 import LiteGraphCanvasSplitterOverlay from '@/components/LiteGraphCanvasSplitterOverlay.vue'
@@ -43,7 +42,10 @@ import SideToolbar from '@/components/sidebar/SideToolbar.vue'
 import SecondRowWorkflowTabs from '@/components/topbar/SecondRowWorkflowTabs.vue'
 import { useCanvasDrop } from '@/composables/useCanvasDrop'
 import { useContextMenuTranslation } from '@/composables/useContextMenuTranslation'
+import { useCopy } from '@/composables/useCopy'
 import { useGlobalLitegraph } from '@/composables/useGlobalLitegraph'
+import { useLitegraphSettings } from '@/composables/useLitegraphSettings'
+import { usePaste } from '@/composables/usePaste'
 import { useWorkflowPersistence } from '@/composables/useWorkflowPersistence'
 import { CORE_SETTINGS } from '@/constants/coreSettings'
 import { i18n } from '@/i18n'
@@ -78,42 +80,6 @@ const canvasMenuEnabled = computed(() =>
 const tooltipEnabled = computed(() => settingStore.get('Comfy.EnableTooltips'))
 
 watchEffect(() => {
-  const canvasInfoEnabled = settingStore.get('Comfy.Graph.CanvasInfo')
-  if (canvasStore.canvas) {
-    canvasStore.canvas.show_info = canvasInfoEnabled
-  }
-})
-
-watchEffect(() => {
-  const zoomSpeed = settingStore.get('Comfy.Graph.ZoomSpeed')
-  if (canvasStore.canvas) {
-    canvasStore.canvas.zoom_speed = zoomSpeed
-  }
-})
-
-watchEffect(() => {
-  LiteGraph.snaps_for_comfy = settingStore.get('Comfy.Node.AutoSnapLinkToSlot')
-})
-
-watchEffect(() => {
-  LiteGraph.snap_highlights_node = settingStore.get(
-    'Comfy.Node.SnapHighlightsNode'
-  )
-})
-
-watchEffect(() => {
-  LGraphNode.keepAllLinksOnBypass = settingStore.get(
-    'Comfy.Node.BypassAllLinksOnDelete'
-  )
-})
-
-watchEffect(() => {
-  LiteGraph.middle_click_slot_add_default_node = settingStore.get(
-    'Comfy.Node.MiddleClickRerouteNode'
-  )
-})
-
-watchEffect(() => {
   nodeDefStore.showDeprecated = settingStore.get('Comfy.Node.ShowDeprecated')
 })
 
@@ -133,71 +99,6 @@ watchEffect(() => {
     textarea.focus()
     textarea.blur()
   })
-})
-
-watchEffect(() => {
-  const linkRenderMode = settingStore.get('Comfy.LinkRenderMode')
-  if (canvasStore.canvas) {
-    canvasStore.canvas.links_render_mode = linkRenderMode
-    canvasStore.canvas.setDirty(/* fg */ false, /* bg */ true)
-  }
-})
-
-watchEffect(() => {
-  const lowQualityRenderingZoomThreshold = settingStore.get(
-    'LiteGraph.Canvas.LowQualityRenderingZoomThreshold'
-  )
-  if (canvasStore.canvas) {
-    canvasStore.canvas.low_quality_zoom_threshold =
-      lowQualityRenderingZoomThreshold
-    canvasStore.canvas.setDirty(/* fg */ true, /* bg */ true)
-  }
-})
-
-watchEffect(() => {
-  const linkMarkerShape = settingStore.get('Comfy.Graph.LinkMarkers')
-  const { canvas } = canvasStore
-  if (canvas) {
-    canvas.linkMarkerShape = linkMarkerShape
-    canvas.setDirty(false, true)
-  }
-})
-
-watchEffect(() => {
-  const reroutesEnabled = settingStore.get('Comfy.RerouteBeta')
-  const { canvas } = canvasStore
-  if (canvas) {
-    canvas.reroutesEnabled = reroutesEnabled
-    canvas.setDirty(false, true)
-  }
-})
-
-watchEffect(() => {
-  const maximumFps = settingStore.get('LiteGraph.Canvas.MaximumFps')
-  const { canvas } = canvasStore
-  if (canvas) canvas.maximumFps = maximumFps
-})
-
-watchEffect(() => {
-  CanvasPointer.doubleClickTime = settingStore.get(
-    'Comfy.Pointer.DoubleClickTime'
-  )
-})
-
-watchEffect(() => {
-  CanvasPointer.bufferTime = settingStore.get('Comfy.Pointer.ClickBufferTime')
-})
-
-watchEffect(() => {
-  CanvasPointer.maxClickDrift = settingStore.get('Comfy.Pointer.ClickDrift')
-})
-
-watchEffect(() => {
-  LiteGraph.CANVAS_GRID_SIZE = settingStore.get('Comfy.SnapToGrid.GridSize')
-})
-
-watchEffect(() => {
-  LiteGraph.alwaysSnapToGrid = settingStore.get('pysssss.SnapToGrid')
 })
 
 watch(
@@ -239,12 +140,6 @@ watch(
   }
 )
 
-watchEffect(() => {
-  LiteGraph.context_menu_scaling = settingStore.get(
-    'LiteGraph.ContextMenu.Scaling'
-  )
-})
-
 const loadCustomNodesI18n = async () => {
   try {
     const i18nData = await api.getCustomNodesI18n()
@@ -259,10 +154,13 @@ const loadCustomNodesI18n = async () => {
 const comfyAppReady = ref(false)
 const workflowPersistence = useWorkflowPersistence()
 useCanvasDrop(canvasRef)
+useLitegraphSettings()
 
 onMounted(async () => {
   useGlobalLitegraph()
   useContextMenuTranslation()
+  useCopy()
+  usePaste()
 
   comfyApp.vueAppReady = true
 
