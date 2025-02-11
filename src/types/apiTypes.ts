@@ -297,7 +297,12 @@ const zIntInputSpec = inputSpec([
     step: z.number().optional(),
     // Note: Many node authors are using INT to pass list of INT.
     // TODO: Add list of ints type.
-    default: z.union([z.number(), z.array(z.number())]).optional()
+    default: z.union([z.number(), z.array(z.number())]).optional(),
+    /**
+     * If true, a linked widget will be added to the node to select the mode
+     * of `control_after_generate`.
+     */
+    control_after_generate: z.boolean().optional()
   })
 ])
 
@@ -339,6 +344,7 @@ const zStringInputSpec = inputSpec([
 const zComboInputProps = zBaseInputSpecValue.extend({
   control_after_generate: z.boolean().optional(),
   image_upload: z.boolean().optional(),
+  image_folder: z.enum(['input', 'output', 'temp']).optional(),
   remote: zRemoteWidgetConfig.optional()
 })
 

@@ -5,16 +5,13 @@ import type {
   IComboWidget,
   IStringWidget
 } from '@comfyorg/litegraph/dist/types/widgets'
-import { Editor as TiptapEditor } from '@tiptap/core'
-import TiptapLink from '@tiptap/extension-link'
-import TiptapTable from '@tiptap/extension-table'
-import TiptapTableCell from '@tiptap/extension-table-cell'
-import TiptapTableHeader from '@tiptap/extension-table-header'
-import TiptapTableRow from '@tiptap/extension-table-row'
-import TiptapStarterKit from '@tiptap/starter-kit'
-import { Markdown as TiptapMarkdown } from 'tiptap-markdown'
 
+import { useFloatWidget } from '@/composables/widgets/useFloatWidget'
+import { useIntWidget } from '@/composables/widgets/useIntWidget'
+import { useMarkdownWidget } from '@/composables/widgets/useMarkdownWidget'
 import { useRemoteWidget } from '@/composables/widgets/useRemoteWidget'
+import { useSeedWidget } from '@/composables/widgets/useSeedWidget'
+import { useStringWidget } from '@/composables/widgets/useStringWidget'
 import { useSettingStore } from '@/stores/settingStore'
 import { useToastStore } from '@/stores/toastStore'
 import { useWidgetStore } from '@/stores/widgetStore'
@@ -47,36 +44,6 @@ export function updateControlWidgetLabel(widget) {
 
 export const IS_CONTROL_WIDGET = Symbol()
 const HAS_EXECUTED = Symbol()
-
-function getNumberDefaults(
-  inputData: InputSpec,
-  defaultStep,
-  precision,
-  enable_rounding
-) {
-  let defaultVal = inputData[1]['default']
-  let { min, max, step, round } = inputData[1]
-
-  if (defaultVal == undefined) defaultVal = 0
-  if (min == undefined) min = 0
-  if (max == undefined) max = 2048
-  if (step == undefined) step = defaultStep
-  // precision is the number of decimal places to show.
-  // by default, display the the smallest number of decimal places such that changes of size step are visible.
-  if (precision == undefined) {
-    precision = Math.max(-Math.floor(Math.log10(step)), 0)
-  }
-
-  if (enable_rounding && (round == undefined || round === true)) {
-    // by default, round the value to those decimal places shown.
-    round = Math.round(1000000 * Math.pow(0.1, precision)) / 1000000
-  }
-
-  return {
-    val: defaultVal,
-    config: { min, max, step: 10.0 * step, round, precision }
-  }
-}
 
 export function addValueControlWidget(
   node,
@@ -281,241 +248,13 @@ export function addValueControlWidgets(
   return widgets
 }
 
-function seedWidget(node, inputName, inputData: InputSpec, app, widgetName) {
-  const seed = createIntWidget(node, inputName, inputData, app, true)
-  const seedControl = addValueControlWidget(
-    node,
-    seed.widget,
-    'randomize',
-    undefined,
-    widgetName,
-    inputData
-  )
-
-  seed.widget.linkedWidgets = [seedControl]
-  return seed
-}
-
-function createIntWidget(
-  node,
-  inputName,
-  inputData: InputSpec,
-  app,
-  isSeedInput: boolean = false
-) {
-  const control = inputData[1]?.control_after_generate
-  if (!isSeedInput && control) {
-    return seedWidget(
-      node,
-      inputName,
-      inputData,
-      app,
-      typeof control === 'string' ? control : undefined
-    )
-  }
-
-  let widgetType = isSlider(inputData[1]['display'], app)
-  const { val, config } = getNumberDefaults(inputData, 1, 0, true)
-  Object.assign(config, { precision: 0 })
-  return {
-    widget: node.addWidget(
-      widgetType,
-      inputName,
-      val,
-      function (v) {
-        const s = this.options.step / 10
-        let sh = this.options.min % s
-        if (isNaN(sh)) {
-          sh = 0
-        }
-        this.value = Math.round((v - sh) / s) * s + sh
-      },
-      config
-    )
-  }
-}
-
-function addMultilineWidget(node, name: string, opts, app: ComfyApp) {
-  const inputEl = document.createElement('textarea')
-  inputEl.className = 'comfy-multiline-input'
-  inputEl.value = opts.defaultVal
-  inputEl.placeholder = opts.placeholder || name
-  if (app.vueAppReady) {
-    inputEl.spellcheck = useSettingStore().get(
-      'Comfy.TextareaWidget.Spellcheck'
-    )
-  }
-
-  const widget = node.addDOMWidget(name, 'customtext', inputEl, {
-    getValue() {
-      return inputEl.value
-    },
-    setValue(v) {
-      inputEl.value = v
-    }
-  })
-  widget.inputEl = inputEl
-
-  inputEl.addEventListener('input', () => {
-    widget.callback?.(widget.value)
-  })
-
-  inputEl.addEventListener('pointerdown', (event: PointerEvent) => {
-    if (event.button === 1) {
-      app.canvas.processMouseDown(event)
-    }
-  })
-
-  inputEl.addEventListener('pointermove', (event: PointerEvent) => {
-    if ((event.buttons & 4) === 4) {
-      app.canvas.processMouseMove(event)
-    }
-  })
-
-  inputEl.addEventListener('pointerup', (event: PointerEvent) => {
-    if (event.button === 1) {
-      app.canvas.processMouseUp(event)
-    }
-  })
-
-  return { minWidth: 400, minHeight: 200, widget }
-}
-
-function addMarkdownWidget(node, name: string, opts, app: ComfyApp) {
-  TiptapMarkdown.configure({
-    html: false,
-    breaks: true,
-    transformPastedText: true
-  })
-  const editor = new TiptapEditor({
-    extensions: [
-      TiptapStarterKit,
-      TiptapMarkdown,
-      TiptapLink,
-      TiptapTable,
-      TiptapTableCell,
-      TiptapTableHeader,
-      TiptapTableRow
-    ],
-    content: opts.defaultVal,
-    editable: false
-  })
-
-  const inputEl = editor.options.element
-  inputEl.classList.add('comfy-markdown')
-  const textarea = document.createElement('textarea')
-  inputEl.append(textarea)
-
-  const widget = node.addDOMWidget(name, 'MARKDOWN', inputEl, {
-    getValue() {
-      return textarea.value
-    },
-    setValue(v) {
-      textarea.value = v
-      editor.commands.setContent(v)
-    }
-  })
-  widget.inputEl = inputEl
-
-  editor.options.element.addEventListener(
-    'pointerdown',
-    (event: PointerEvent) => {
-      if (event.button !== 0) {
-        app.canvas.processMouseDown(event)
-        return
-      }
-      if (event.target instanceof HTMLAnchorElement) {
-        return
-      }
-      inputEl.classList.add('editing')
-      setTimeout(() => {
-        textarea.focus()
-      }, 0)
-    }
-  )
-
-  textarea.addEventListener('blur', () => {
-    inputEl.classList.remove('editing')
-  })
-
-  textarea.addEventListener('change', () => {
-    editor.commands.setContent(textarea.value)
-    widget.callback?.(widget.value)
-  })
-
-  inputEl.addEventListener('keydown', (event: KeyboardEvent) => {
-    event.stopPropagation()
-  })
-
-  inputEl.addEventListener('pointerdown', (event: PointerEvent) => {
-    if (event.button === 1) {
-      app.canvas.processMouseDown(event)
-    }
-  })
-
-  inputEl.addEventListener('pointermove', (event: PointerEvent) => {
-    if ((event.buttons & 4) === 4) {
-      app.canvas.processMouseMove(event)
-    }
-  })
-
-  inputEl.addEventListener('pointerup', (event: PointerEvent) => {
-    if (event.button === 1) {
-      app.canvas.processMouseUp(event)
-    }
-  })
-
-  return { minWidth: 400, minHeight: 200, widget }
-}
-
-function isSlider(display, app) {
-  if (app.ui.settings.getSettingValue('Comfy.DisableSliders')) {
-    return 'number'
-  }
-
-  return display === 'slider' ? 'slider' : 'number'
-}
+const SeedWidget = useSeedWidget()
 
 export const ComfyWidgets: Record<string, ComfyWidgetConstructor> = {
-  'INT:seed': seedWidget,
-  'INT:noise_seed': seedWidget,
-  FLOAT(node, inputName, inputData: InputSpec, app) {
-    let widgetType: 'number' | 'slider' = isSlider(inputData[1]['display'], app)
-    let precision = app.ui.settings.getSettingValue(
-      'Comfy.FloatRoundingPrecision'
-    )
-    let disable_rounding = app.ui.settings.getSettingValue(
-      'Comfy.DisableFloatRounding'
-    )
-    if (precision == 0) precision = undefined
-    const { val, config } = getNumberDefaults(
-      inputData,
-      0.5,
-      precision,
-      !disable_rounding
-    )
-    return {
-      widget: node.addWidget(
-        widgetType,
-        inputName,
-        val,
-        function (v) {
-          if (config.round) {
-            this.value =
-              Math.round((v + Number.EPSILON) / config.round) * config.round
-            if (this.value > config.max) this.value = config.max
-            if (this.value < config.min) this.value = config.min
-          } else {
-            this.value = v
-          }
-        },
-        config
-      )
-    }
-  },
-  INT(node, inputName, inputData: InputSpec, app) {
-    return createIntWidget(node, inputName, inputData, app)
-  },
+  'INT:seed': SeedWidget,
+  'INT:noise_seed': SeedWidget,
+  INT: useIntWidget(),
+  FLOAT: useFloatWidget(),
   BOOLEAN(node, inputName, inputData) {
     let defaultVal = false
     let options = {}
@@ -528,41 +267,8 @@ export const ComfyWidgets: Record<string, ComfyWidgetConstructor> = {
       widget: node.addWidget('toggle', inputName, defaultVal, () => {}, options)
     }
   },
-  STRING(node, inputName, inputData: InputSpec, app) {
-    const defaultVal = inputData[1].default || ''
-    const multiline = !!inputData[1].multiline
-
-    let res
-    if (multiline) {
-      res = addMultilineWidget(
-        node,
-        inputName,
-        { defaultVal, ...inputData[1] },
-        app
-      )
-    } else {
-      res = {
-        widget: node.addWidget('text', inputName, defaultVal, () => {}, {})
-      }
-    }
-
-    if (inputData[1].dynamicPrompts != undefined)
-      res.widget.dynamicPrompts = inputData[1].dynamicPrompts
-
-    return res
-  },
-  MARKDOWN(node, inputName, inputData: InputSpec, app) {
-    const defaultVal = inputData[1].default || ''
-
-    let res
-    res = addMarkdownWidget(
-      node,
-      inputName,
-      { defaultVal, ...inputData[1] },
-      app
-    )
-    return res
-  },
+  STRING: useStringWidget(),
+  MARKDOWN: useMarkdownWidget(),
   COMBO(node, inputName, inputData: InputSpec) {
     const widgetStore = useWidgetStore()
     const { remote, options } = inputData[1]
@@ -622,6 +328,7 @@ export const ComfyWidgets: Record<string, ComfyWidgetConstructor> = {
       (w) => w.name === (inputData[1]?.widget ?? 'image')
     ) as IStringWidget
     let uploadWidget
+    const { image_folder = 'input' } = inputData[1] ?? {}
 
     function showImage(name) {
       const img = new Image()
@@ -636,7 +343,7 @@ export const ComfyWidgets: Record<string, ComfyWidgetConstructor> = {
         name = name.substring(folder_separator + 1)
       }
       img.src = api.apiURL(
-        `/view?filename=${encodeURIComponent(name)}&type=input&subfolder=${subfolder}${app.getPreviewFormatParam()}${app.getRandParam()}`
+        `/view?filename=${encodeURIComponent(name)}&type=${image_folder}&subfolder=${subfolder}${app.getPreviewFormatParam()}${app.getRandParam()}`
       )
       node.setSizeForImage?.()
     }
