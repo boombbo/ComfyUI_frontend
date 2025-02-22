@@ -1,5 +1,5 @@
 import type { ColorOption, IWidget } from '@comfyorg/litegraph'
-import { LGraphNode, isColorable } from '@comfyorg/litegraph'
+import { LGraphGroup, LGraphNode, isColorable } from '@comfyorg/litegraph'
 import type { IComboWidget } from '@comfyorg/litegraph/dist/types/widgets'
 import _ from 'lodash'
 
@@ -21,8 +21,11 @@ export function addToComboValues(widget: IComboWidget, value: string) {
 }
 
 export const isLGraphNode = (item: unknown): item is LGraphNode => {
-  const name = item?.constructor?.name
-  return name === 'ComfyNode' || name === 'LGraphNode'
+  return item instanceof LGraphNode
+}
+
+export const isLGraphGroup = (item: unknown): item is LGraphGroup => {
+  return item instanceof LGraphGroup
 }
 
 /**
@@ -41,4 +44,15 @@ export const getItemsColorOption = (items: unknown[]): ColorOption | null => {
   )
     ? _.head(colorOptions)!
     : null
+}
+
+export function executeWidgetsCallback(
+  nodes: LGraphNode[],
+  callbackName: 'onRemove' | 'beforeQueued' | 'afterQueued'
+) {
+  for (const node of nodes) {
+    for (const widget of node.widgets ?? []) {
+      widget[callbackName]?.()
+    }
+  }
 }
