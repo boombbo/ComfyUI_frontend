@@ -1,7 +1,7 @@
 import '@comfyorg/litegraph'
 import type { LLink, Size } from '@comfyorg/litegraph'
 
-import type { DOMWidget } from '@/scripts/domWidget'
+import type { DOMWidget, DOMWidgetOptions } from '@/scripts/domWidget'
 import type { ComfyNodeDef } from '@/types/apiTypes'
 
 import type { NodeId } from './comfyWorkflow'
@@ -112,12 +112,15 @@ declare module '@comfyorg/litegraph' {
      */
     isVirtualNode?: boolean
 
-    addDOMWidget(
+    addDOMWidget<
+      T extends HTMLElement = HTMLElement,
+      V extends object | string = string
+    >(
       name: string,
       type: string,
-      element: HTMLElement,
-      options?: Record<string, any>
-    ): DOMWidget
+      element: T,
+      options?: DOMWidgetOptions<T, V>
+    ): DOMWidget<T, V>
 
     animatedImages?: boolean
     imgs?: HTMLImageElement[]
@@ -126,6 +129,8 @@ declare module '@comfyorg/litegraph' {
     videoContainer?: HTMLElement
     /** Whether the node's preview media is loading */
     isLoading?: boolean
+    /** The content type of the node's preview media */
+    previewMediaType?: 'image' | 'video' | 'audio' | 'model'
 
     preview: string[]
     /** Index of the currently selected image on a multi-image node such as Preview Image */
@@ -138,7 +143,7 @@ declare module '@comfyorg/litegraph' {
     /** @deprecated Unused */
     inputHeight?: unknown
 
-    /** @deprecated Unused */
+    /** The y offset of the image preview to the top of the node body. */
     imageOffset?: number
     /** Callback for pasting an image file into the node */
     pasteFile?(file: File): void
