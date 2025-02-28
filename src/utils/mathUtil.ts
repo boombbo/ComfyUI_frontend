@@ -1,4 +1,4 @@
-import type { InputSpec } from '@/types/apiTypes'
+import type { InputSpec } from '@/schemas/nodeDefSchema'
 
 export function getNumberDefaults(
   inputOptions: InputSpec[1],
@@ -27,6 +27,14 @@ export function getNumberDefaults(
 
   return {
     val: defaultVal,
-    config: { min, max, step: 10.0 * step, round, precision }
+    config: {
+      min,
+      max,
+      /** @deprecated Use step2 instead. The 10x value is a legacy implementation. */
+      step: step * 10.0,
+      step2: step,
+      round,
+      precision
+    }
   }
 }

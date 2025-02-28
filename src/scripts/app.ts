@@ -13,6 +13,13 @@ import type { ToastMessageOptions } from 'primevue/toast'
 import { reactive } from 'vue'
 
 import { st } from '@/i18n'
+import {
+  type ComfyWorkflowJSON,
+  type ModelFile,
+  type NodeId,
+  validateComfyWorkflow
+} from '@/schemas/comfyWorkflowSchema'
+import type { ComfyNodeDef } from '@/schemas/nodeDefSchema'
 import { useDialogService } from '@/services/dialogService'
 import { useExtensionService } from '@/services/extensionService'
 import { useLitegraphService } from '@/services/litegraphService'
@@ -29,13 +36,7 @@ import { useWidgetStore } from '@/stores/widgetStore'
 import { ComfyWorkflow } from '@/stores/workflowStore'
 import { useColorPaletteStore } from '@/stores/workspace/colorPaletteStore'
 import { useWorkspaceStore } from '@/stores/workspaceStore'
-import type { ComfyNodeDef } from '@/types/apiTypes'
 import type { ComfyExtension, MissingNodeType } from '@/types/comfy'
-import {
-  type ComfyWorkflowJSON,
-  type NodeId,
-  validateComfyWorkflow
-} from '@/types/comfyWorkflow'
 import { ExtensionManager } from '@/types/extensionTypes'
 import { ColorAdjustOptions, adjustColor } from '@/utils/colorUtil'
 import { graphToPrompt } from '@/utils/executionUtil'
@@ -1042,13 +1043,16 @@ export class ComfyApp {
     useWorkflowService().beforeLoadNewGraph()
 
     const missingNodeTypes: MissingNodeType[] = []
-    const missingModels = []
+    const missingModels: ModelFile[] = []
     await useExtensionService().invokeExtensionsAsync(
       'beforeConfigureGraph',
       graphData,
       missingNodeTypes
       // TODO: missingModels
     )
+
+    const embeddedModels: ModelFile[] = []
+
     for (let n of graphData.nodes) {
       // Patch T2IAdapterLoader to ControlNetLoader since they are the same node now
       if (n.type == 'T2IAdapterLoader') n.type = 'ControlNetLoader'
@@ -1061,13 +1065,28 @@ export class ComfyApp {
         missingNodeTypes.push(n.type)
         n.type = sanitizeNodeName(n.type)
       }
+
+      // Collect models metadata from node
+      if (n.properties?.models?.length)
+        embeddedModels.push(...n.properties.models)
     }
+
+    // Merge models from the workflow's root-level 'models' field
+    const workflowSchemaV1Models = graphData.models
+    if (workflowSchemaV1Models?.length)
+      embeddedModels.push(...workflowSchemaV1Models)
+
+    const getModelKey = (model: ModelFile) => model.url || model.hash
+    const validModels = embeddedModels.filter(getModelKey)
+    const uniqueModels = _.uniqBy(validModels, getModelKey)
+
     if (
-      graphData.models &&
+      uniqueModels.length &&
       useSettingStore().get('Comfy.Workflow.ShowMissingModelsWarning')
     ) {
       const modelStore = useModelStore()
-      for (const m of graphData.models) {
+      await modelStore.loadModelFolders()
+      for (const m of uniqueModels) {
         const modelFolder = await modelStore.getLoadedModelFolder(m.directory)
         // @ts-expect-error
         if (!modelFolder) m.directory_invalid = true

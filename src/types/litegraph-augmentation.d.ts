@@ -1,10 +1,10 @@
 import '@comfyorg/litegraph'
 import type { LLink, Size } from '@comfyorg/litegraph'
 
+import type { ComfyNodeDef } from '@/schemas/nodeDefSchema'
 import type { DOMWidget, DOMWidgetOptions } from '@/scripts/domWidget'
-import type { ComfyNodeDef } from '@/types/apiTypes'
 
-import type { NodeId } from './comfyWorkflow'
+import type { NodeId } from '../schemas/comfyWorkflowSchema'
 
 /** ComfyUI extensions of litegraph */
 declare module '@comfyorg/litegraph/dist/types/widgets' {
@@ -17,6 +17,10 @@ declare module '@comfyorg/litegraph/dist/types/widgets' {
      * - If true or undefined, the value will be included in both the API workflow and graph state
      */
     serialize?: boolean
+    /**
+     * Rounding value for numeric float widgets.
+     */
+    round?: number
   }
 
   interface IBaseWidget {
