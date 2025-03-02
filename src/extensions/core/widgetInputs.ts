@@ -14,10 +14,11 @@ import type { CanvasMouseEvent } from '@comfyorg/litegraph/dist/types/events'
 
 import type { InputSpec } from '@/schemas/nodeDefSchema'
 import { app } from '@/scripts/app'
-import { applyTextReplacements, clone } from '@/scripts/utils'
+import { clone } from '@/scripts/utils'
 import { ComfyWidgets, addValueControlWidgets } from '@/scripts/widgets'
 import { useNodeDefStore } from '@/stores/nodeDefStore'
 import { useSettingStore } from '@/stores/settingStore'
+import { applyTextReplacements } from '@/utils/searchAndReplace'
 import { isPrimitiveNode } from '@/utils/typeGuardUtil'
 
 const CONVERTED_TYPE = 'converted-widget'
@@ -73,7 +74,7 @@ export class PrimitiveNode extends LGraphNode {
     ]
     let v = this.widgets?.[0].value
     if (v && this.properties[replacePropertyName]) {
-      v = applyTextReplacements(app, v as string)
+      v = applyTextReplacements(app.graph.nodes, v as string)
     }
 
     // For each output link copy our value over the original widget value
@@ -244,6 +245,7 @@ export class PrimitiveNode extends LGraphNode {
     if (type in ComfyWidgets) {
       widget = (ComfyWidgets[type](this, 'value', inputData, app) || {}).widget
     } else {
+      // @ts-expect-error InputSpec is not typed correctly
       widget = this.addWidget(type, 'value', null, () => {}, {})
     }
 
@@ -451,6 +453,7 @@ function getConfig(widgetName: string) {
 
 function isConvertibleWidget(widget: IWidget, config: InputSpec): boolean {
   return (
+    // @ts-expect-error InputSpec is not typed correctly
     (VALID_TYPES.includes(widget.type) || VALID_TYPES.includes(config[0])) &&
     !widget.options?.forceInput
   )
@@ -676,6 +679,7 @@ export function mergeIfValid(
             return
           }
           getCustomConfig()[k] =
+            // @ts-expect-error InputSpec is not typed correctly
             v1 == null ? v2 : v2 == null ? v1 : Math.max(v1, v2)
           continue
         } else if (k === 'max') {
@@ -685,6 +689,7 @@ export function mergeIfValid(
             return
           }
           getCustomConfig()[k] =
+            // @ts-expect-error InputSpec is not typed correctly
             v1 == null ? v2 : v2 == null ? v1 : Math.min(v1, v2)
           continue
         } else if (k === 'step') {
@@ -702,6 +707,7 @@ export function mergeIfValid(
               v2 = v1
               v1 = a
             }
+            // @ts-expect-error InputSpec is not typed correctly
             if (v1 % v2) {
               console.log(
                 'connection rejected: steps not divisible',
