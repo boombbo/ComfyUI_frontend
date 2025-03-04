@@ -14,10 +14,10 @@ import type { CanvasMouseEvent } from '@comfyorg/litegraph/dist/types/events'
 
 import type { InputSpec } from '@/schemas/nodeDefSchema'
 import { app } from '@/scripts/app'
-import { clone } from '@/scripts/utils'
 import { ComfyWidgets, addValueControlWidgets } from '@/scripts/widgets'
 import { useNodeDefStore } from '@/stores/nodeDefStore'
 import { useSettingStore } from '@/stores/settingStore'
+import { mergeInputSpec } from '@/utils/nodeDefUtil'
 import { applyTextReplacements } from '@/utils/searchAndReplace'
 import { isPrimitiveNode } from '@/utils/typeGuardUtil'
 
@@ -551,26 +551,6 @@ function getWidgetType(config: InputSpec) {
   return { type }
 }
 
-function isValidCombo(combo: string[], obj: unknown) {
-  // New input isnt a combo
-  if (!(obj instanceof Array)) {
-    console.log(`connection rejected: tried to connect combo to ${obj}`)
-    return false
-  }
-  // New input combo has a different size
-  if (combo.length !== obj.length) {
-    console.log(`connection rejected: combo lists dont match`)
-    return false
-  }
-  // New input combo has different elements
-  if (combo.find((v, i) => obj[i] !== v)) {
-    console.log(`connection rejected: combo lists dont match`)
-    return false
-  }
-
-  return true
-}
-
 export function setWidgetConfig(
   slot: INodeInputSlot | INodeOutputSlot,
   config: InputSpec
@@ -603,113 +583,17 @@ export function mergeIfValid(
   config2: InputSpec,
   forceUpdate?: boolean,
   recreateWidget?: () => void,
-  config1?: unknown
-): { customConfig: Record<string, unknown> } {
+  config1?: InputSpec
+): { customConfig: InputSpec[1] } {
   if (!config1) {
     config1 = getWidgetConfig(output)
   }
 
-  if (config1[0] instanceof Array) {
-    if (!isValidCombo(config1[0], config2[0])) return
-  } else if (config1[0] !== config2[0]) {
-    // Types dont match
-    console.log(`connection rejected: types dont match`, config1[0], config2[0])
-    return
-  }
+  const customSpec = mergeInputSpec(config1, config2)
 
-  const keys = new Set([
-    ...Object.keys(config1[1] ?? {}),
-    ...Object.keys(config2[1] ?? {})
-  ])
-
-  let customConfig: Record<string, unknown> | undefined
-  const getCustomConfig = () => {
-    if (!customConfig) {
-      customConfig = clone(config1[1] ?? {})
-    }
-    return customConfig
-  }
-
-  const isNumber = config1[0] === 'INT' || config1[0] === 'FLOAT'
-  for (const k of keys.values()) {
-    if (
-      k !== 'default' &&
-      k !== 'forceInput' &&
-      k !== 'defaultInput' &&
-      k !== 'control_after_generate' &&
-      k !== 'multiline' &&
-      k !== 'tooltip' &&
-      k !== 'dynamicPrompts'
-    ) {
-      let v1 = config1[1][k]
-      let v2 = config2[1]?.[k]
-
-      if (v1 === v2 || (!v1 && !v2)) continue
-
-      if (isNumber) {
-        if (k === 'min') {
-          const theirMax = config2[1]?.['max']
-          if (theirMax != null && v1 > theirMax) {
-            console.log('connection rejected: min > max', v1, theirMax)
-            return
-          }
-          getCustomConfig()[k] =
-            // @ts-expect-error InputSpec is not typed correctly
-            v1 == null ? v2 : v2 == null ? v1 : Math.max(v1, v2)
-          continue
-        } else if (k === 'max') {
-          const theirMin = config2[1]?.['min']
-          if (theirMin != null && v1 < theirMin) {
-            console.log('connection rejected: max < min', v1, theirMin)
-            return
-          }
-          getCustomConfig()[k] =
-            // @ts-expect-error InputSpec is not typed correctly
-            v1 == null ? v2 : v2 == null ? v1 : Math.min(v1, v2)
-          continue
-        } else if (k === 'step') {
-          let step
-          if (v1 == null) {
-            // No current step
-            step = v2
-          } else if (v2 == null) {
-            // No new step
-            step = v1
-          } else {
-            if (v1 < v2) {
-              // Ensure v1 is larger for the mod
-              const a = v2
-              v2 = v1
-              v1 = a
-            }
-            // @ts-expect-error InputSpec is not typed correctly
-            if (v1 % v2) {
-              console.log(
-                'connection rejected: steps not divisible',
-                'current:',
-                v1,
-                'new:',
-                v2
-              )
-              return
-            }
-
-            step = v1
-          }
-
-          getCustomConfig()[k] = step
-          continue
-        }
-      }
-
-      console.log(`connection rejected: config ${k} values dont match`, v1, v2)
-      return
-    }
-  }
-
-  if (customConfig || forceUpdate) {
-    if (customConfig) {
-      output.widget[CONFIG] = [config1[0], customConfig]
+  if (customSpec || forceUpdate) {
+    if (customSpec) {
+      output.widget[CONFIG] = customSpec
     }
 
     const widget = recreateWidget?.call(this)
@@ -723,7 +607,7 @@ export function mergeIfValid(
     }
   }
 
-  return { customConfig }
+  return { customConfig: customSpec[1] }
 }
 
 app.registerExtension({
@@ -982,7 +866,6 @@ app.registerExtension({
 
     // Double click a widget input to automatically attach a primitive
     const origOnInputDblClick = nodeType.prototype.onInputDblClick
-    const ignoreDblClick = Symbol()
     nodeType.prototype.onInputDblClick = function (
       this: LGraphNode,
       slot: number
@@ -992,7 +875,7 @@ app.registerExtension({
         : undefined
 
       const input = this.inputs[slot]
-      if (!input.widget || !input[ignoreDblClick]) {
+      if (!input.widget) {
         // Not a widget input or already handled input
         if (
           !(input.type in ComfyWidgets) &&
@@ -1019,44 +902,7 @@ app.registerExtension({
       node.connect(0, this, slot)
       node.title = input.name
 
-      // Prevent adding duplicates due to triple clicking
-      input[ignoreDblClick] = true
-      setTimeout(() => {
-        delete input[ignoreDblClick]
-      }, 300)
-
       return r
-    }
-
-    // Prevent connecting COMBO lists to converted inputs that dont match types
-    const onConnectInput = nodeType.prototype.onConnectInput
-    nodeType.prototype.onConnectInput = function (
-      this: LGraphNode,
-      targetSlot: number,
-      type: string,
-      output: INodeOutputSlot,
-      originNode: LGraphNode,
-      originSlot: number
-    ) {
-      // @ts-expect-error onConnectInput has 5 arguments
-      const v = onConnectInput?.(this, arguments)
-      // Not a combo, ignore
-      if (type !== 'COMBO') return v
-      // Primitive output, allow that to handle
-      if (originNode.outputs[originSlot].widget) return v
-
-      // Ensure target is also a combo
-      const targetCombo = this.inputs[targetSlot].widget?.[GET_CONFIG]?.()?.[0]
-      if (!targetCombo || !(targetCombo instanceof Array)) return v
-
-      // Check they match
-      const originConfig =
-        originNode.constructor?.nodeData?.output?.[originSlot]
-      if (!originConfig || !isValidCombo(targetCombo, originConfig)) {
-        return false
-      }
-
-      return v
     }
   },
   registerCustomNodes() {

@@ -1,6 +1,7 @@
 import { z } from 'zod'
 import { fromZodError } from 'zod-validation-error'
 
+const zComboOption = z.union([z.string(), z.number()])
 const zRemoteWidgetConfig = z.object({
   route: z.string().url().or(z.string().startsWith('/')),
   refresh: z.number().gte(128).safe().or(z.number().lte(0).safe()).optional(),
@@ -15,6 +16,7 @@ const zRemoteWidgetConfig = z.object({
 const zBaseInputOptions = z
   .object({
     default: z.any().optional(),
+    /** @deprecated Group node uses this field. Remove when group node feature is removed. */
     defaultInput: z.boolean().optional(),
     forceInput: z.boolean().optional(),
     tooltip: z.string().optional(),
@@ -32,7 +34,7 @@ const zNumericInputOptions = zBaseInputOptions.extend({
   step: z.number().optional(),
   // Note: Many node authors are using INT/FLOAT to pass list of INT/FLOAT.
   default: z.union([z.number(), z.array(z.number())]).optional(),
-  display: z.enum(['slider', 'number']).optional()
+  display: z.enum(['slider', 'number', 'knob']).optional()
 })
 
 const zIntInputOptions = zNumericInputOptions.extend({
@@ -70,7 +72,7 @@ const zComboInputOptions = zBaseInputOptions.extend({
   allow_batch: z.boolean().optional(),
   video_upload: z.boolean().optional(),
   remote: zRemoteWidgetConfig.optional(),
-  options: z.array(z.union([z.string(), z.number()])).optional()
+  options: z.array(zComboOption).optional()
 })
 
 const zIntInputSpec = z.tuple([z.literal('INT'), zIntInputOptions.optional()])
@@ -86,8 +88,12 @@ const zStringInputSpec = z.tuple([
   z.literal('STRING'),
   zStringInputOptions.optional()
 ])
+/**
+ * Legacy combo syntax.
+ * @deprecated Use `zComboInputSpecV2` instead.
+ */
 const zComboInputSpec = z.tuple([
-  z.array(z.union([z.string(), z.number()])),
+  z.array(zComboOption),
   zComboInputOptions.optional()
 ])
 const zComboInputSpecV2 = z.tuple([
@@ -143,6 +149,30 @@ export function isComboInputSpec(
   return isComboInputSpecV1(inputSpec) || isComboInputSpecV2(inputSpec)
 }
 
+/**
+ * Get the type of an input spec.
+ *
+ * @param inputSpec - The input spec to get the type of.
+ * @returns The type of the input spec.
+ */
+export function getInputSpecType(inputSpec: InputSpec): string {
+  return isComboInputSpec(inputSpec) ? 'COMBO' : inputSpec[0]
+}
+
+/**
+ * Get the combo options from a combo input spec.
+ *
+ * @param inputSpec - The input spec to get the combo options from.
+ * @returns The combo options.
+ */
+export function getComboSpecComboOptions(
+  inputSpec: ComboInputSpec | ComboInputSpecV2
+): (number | string)[] {
+  return (
+    (isComboInputSpecV2(inputSpec) ? inputSpec[1]?.options : inputSpec[0]) ?? []
+  )
+}
+
 const excludedLiterals = new Set(['INT', 'FLOAT', 'BOOLEAN', 'STRING', 'COMBO'])
 const zCustomInputSpec = z.tuple([
   z.string().refine((value) => !excludedLiterals.has(value)),
@@ -168,7 +198,7 @@ const zComfyInputsSpec = z.object({
 })
 
 const zComfyNodeDataType = z.string()
-const zComfyComboOutput = z.array(z.any())
+const zComfyComboOutput = z.array(zComboOption)
 const zComfyOutputTypesSpec = z.array(
   z.union([zComfyNodeDataType, zComfyComboOutput])
 )
@@ -201,6 +231,8 @@ export type FloatInputOptions = z.infer<typeof zFloatInputOptions>
 export type BooleanInputOptions = z.infer<typeof zBooleanInputOptions>
 export type StringInputOptions = z.infer<typeof zStringInputOptions>
 export type ComboInputOptions = z.infer<typeof zComboInputOptions>
+export type BaseInputOptions = z.infer<typeof zBaseInputOptions>
+export type NumericInputOptions = z.infer<typeof zNumericInputOptions>
 
 export type IntInputSpec = z.infer<typeof zIntInputSpec>
 export type FloatInputSpec = z.infer<typeof zFloatInputSpec>
