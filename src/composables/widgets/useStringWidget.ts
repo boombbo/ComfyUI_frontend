@@ -86,7 +86,7 @@ export const useStringWidget = () => {
       }
     }
 
-    if (inputOptions.dynamicPrompts != undefined) {
+    if (typeof inputOptions.dynamicPrompts === 'boolean') {
       res.widget.dynamicPrompts = inputOptions.dynamicPrompts
     }
 
