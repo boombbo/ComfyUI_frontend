@@ -1,5 +1,5 @@
 import { LGraphCanvas, LGraphNode } from '@comfyorg/litegraph'
-import type { Size, Vector4 } from '@comfyorg/litegraph'
+import type { Vector4 } from '@comfyorg/litegraph'
 import type { ISerialisedNode } from '@comfyorg/litegraph/dist/types/serialisation'
 import type {
   ICustomWidget,
@@ -8,7 +8,9 @@ import type {
 
 import { useChainCallback } from '@/composables/functional/useChainCallback'
 import { app } from '@/scripts/app'
+import { useDomWidgetStore } from '@/stores/domWidgetStore'
 import { useSettingStore } from '@/stores/settingStore'
+import { generateRandomSuffix } from '@/utils/formatUtil'
 
 interface Rect {
   height: number
@@ -19,6 +21,7 @@ interface Rect {
 
 export interface DOMWidget<T extends HTMLElement, V extends object | string>
   extends ICustomWidget<T> {
+  // ICustomWidget properties
   type: 'custom'
   element: T
   options: DOMWidgetOptions<T, V>
@@ -30,6 +33,9 @@ export interface DOMWidget<T extends HTMLElement, V extends object | string>
    */
   inputEl?: T
   callback?: (value: V) => void
+  // DOMWidget properties
+  /** The unique ID of the widget. */
+  id: string
 }
 
 export interface DOMWidgetOptions<
@@ -127,9 +133,8 @@ LGraphCanvas.prototype.computeVisibleNodes = function (
         if (w.element) {
           w.element.dataset.isInVisibleNodes = hidden ? 'false' : 'true'
           const shouldOtherwiseHide = w.element.dataset.shouldHide === 'true'
-          const isCollapsed = w.element.dataset.collapsed === 'true'
           const wasHidden = w.element.hidden
-          const actualHidden = hidden || shouldOtherwiseHide || isCollapsed
+          const actualHidden = hidden || shouldOtherwiseHide || node.collapsed
           w.element.hidden = actualHidden
           w.element.style.display = actualHidden ? 'none' : ''
           if (actualHidden && !wasHidden) {
@@ -146,30 +151,35 @@ LGraphCanvas.prototype.computeVisibleNodes = function (
 export class DOMWidgetImpl<T extends HTMLElement, V extends object | string>
   implements DOMWidget<T, V>
 {
-  type: 'custom'
-  name: string
-  element: T
-  options: DOMWidgetOptions<T, V>
+  readonly type: 'custom'
+  readonly name: string
+  readonly element: T
+  readonly options: DOMWidgetOptions<T, V>
   computedHeight?: number
   callback?: (value: V) => void
-  private mouseDownHandler?: (event: MouseEvent) => void
 
-  constructor(
-    name: string,
-    type: string,
-    element: T,
-    options: DOMWidgetOptions<T, V> = {}
-  ) {
+  readonly id: string
+  mouseDownHandler?: (event: MouseEvent) => void
+
+  constructor(obj: {
+    id: string
+    name: string
+    type: string
+    element: T
+    options: DOMWidgetOptions<T, V>
+  }) {
     // @ts-expect-error custom widget type
-    this.type = type
-    this.name = name
-    this.element = element
-    this.options = options
+    this.type = obj.type
+    this.name = obj.name
+    this.element = obj.element
+    this.options = obj.options
 
-    if (element.blur) {
+    this.id = obj.id
+
+    if (this.element.blur) {
       this.mouseDownHandler = (event) => {
-        if (!element.contains(event.target as HTMLElement)) {
-          element.blur()
+        if (!this.element.contains(event.target as HTMLElement)) {
+          this.element.blur()
         }
       }
       document.addEventListener('mousedown', this.mouseDownHandler)
@@ -241,12 +251,12 @@ export class DOMWidgetImpl<T extends HTMLElement, V extends object | string>
       // @ts-expect-error custom widget type
       this.type === 'converted-widget' ||
       // @ts-expect-error custom widget type
-      this.type === 'hidden'
+      this.type === 'hidden' ||
+      node.collapsed
 
     this.element.dataset.shouldHide = hidden ? 'true' : 'false'
     const isInVisibleNodes = this.element.dataset.isInVisibleNodes === 'true'
-    const isCollapsed = this.element.dataset.collapsed === 'true'
-    const actualHidden = hidden || !isInVisibleNodes || isCollapsed
+    const actualHidden = hidden || !isInVisibleNodes
     const wasHidden = this.element.hidden
     this.element.hidden = actualHidden
     this.element.style.display = actualHidden ? 'none' : ''
@@ -289,6 +299,7 @@ export class DOMWidgetImpl<T extends HTMLElement, V extends object | string>
       document.removeEventListener('mousedown', this.mouseDownHandler)
     }
     this.element.remove()
+    useDomWidgetStore().unregisterWidget(this.id)
   }
 }
 
@@ -304,9 +315,6 @@ LGraphNode.prototype.addDOMWidget = function <
 ): DOMWidget<T, V> {
   options = { hideOnZoom: true, selectOn: ['focus', 'click'], ...options }
 
-  if (!element.parentElement) {
-    app.canvasContainer.append(element)
-  }
   element.hidden = true
   element.style.display = 'none'
 
@@ -317,7 +325,14 @@ LGraphNode.prototype.addDOMWidget = function <
     element.title = tooltip
   }
 
-  const widget = new DOMWidgetImpl(name, type, element, options)
+  const widget = new DOMWidgetImpl({
+    id: `${this.id}:${name}:${generateRandomSuffix()}`,
+    name,
+    type,
+    element,
+    options
+  })
+
   // Workaround for https://github.com/Comfy-Org/ComfyUI_frontend/issues/2493
   // Some custom nodes are explicitly expecting getter and setter of `value`
   // property to be on instance instead of prototype.
@@ -343,25 +358,6 @@ LGraphNode.prototype.addDOMWidget = function <
   this.addCustomWidget(widget)
   elementWidgets.add(this)
 
-  const collapse = this.collapse
-  this.collapse = function (this: LGraphNode, force?: boolean) {
-    collapse.call(this, force)
-    if (this.collapsed) {
-      element.hidden = true
-      element.style.display = 'none'
-    }
-    element.dataset.collapsed = this.collapsed ? 'true' : 'false'
-  }
-
-  const { onConfigure } = this
-  this.onConfigure = function (
-    this: LGraphNode,
-    serializedNode: ISerialisedNode
-  ) {
-    onConfigure?.call(this, serializedNode)
-    element.dataset.collapsed = this.collapsed ? 'true' : 'false'
-  }
-
   const onRemoved = this.onRemoved
   this.onRemoved = function (this: LGraphNode) {
     element.remove()
@@ -373,6 +369,8 @@ LGraphNode.prototype.addDOMWidget = function <
     options.beforeResize?.call(widget, this)
     options.afterResize?.call(widget, this)
   })
+
+  useDomWidgetStore().registerWidget(widget)
 
   return widget
 }

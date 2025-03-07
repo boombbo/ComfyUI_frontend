@@ -394,7 +394,12 @@ export const useLitegraphService = () => {
       if (isNewOutput || isNewPreview) {
         this.animatedImages = output?.animated?.find(Boolean)
 
-        if (this.animatedImages || isVideoNode(this)) {
+        const isAnimatedWebp =
+          this.animatedImages &&
+          output.images.some((img) => img.filename?.includes('webp'))
+        const isVideo =
+          (this.animatedImages && !isAnimatedWebp) || isVideoNode(this)
+        if (isVideo) {
           useNodeVideo(this).showPreview()
         } else {
           useNodeImage(this).showPreview()
@@ -419,6 +424,7 @@ export const useLitegraphService = () => {
         } else {
           const host = createImageHost(this)
           this.setSizeForImage(true)
+          // @ts-expect-error host is not a standard DOM widget option.
           const widget = this.addDOMWidget(
             ANIM_PREVIEW_WIDGET,
             'img',
