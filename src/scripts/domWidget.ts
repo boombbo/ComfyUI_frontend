@@ -1,17 +1,17 @@
 import { LGraphNode } from '@comfyorg/litegraph'
 import type {
   ICustomWidget,
+  IWidget,
   IWidgetOptions
 } from '@comfyorg/litegraph/dist/types/widgets'
 import _ from 'lodash'
 
 import { useChainCallback } from '@/composables/functional/useChainCallback'
-import { app } from '@/scripts/app'
 import { useDomWidgetStore } from '@/stores/domWidgetStore'
 import { generateUUID } from '@/utils/formatUtil'
 
 export interface DOMWidget<T extends HTMLElement, V extends object | string>
-  extends ICustomWidget<T> {
+  extends ICustomWidget {
   // ICustomWidget properties
   type: 'custom'
   element: T
@@ -57,6 +57,10 @@ export interface DOMWidgetOptions<
   afterResize?: (this: DOMWidget<T, V>, node: LGraphNode) => void
 }
 
+export const isDOMWidget = <T extends HTMLElement, V extends object | string>(
+  widget: IWidget
+): widget is DOMWidget<T, V> => 'element' in widget && !!widget.element
+
 export class DOMWidgetImpl<T extends HTMLElement, V extends object | string>
   implements DOMWidget<T, V>
 {
@@ -69,7 +73,6 @@ export class DOMWidgetImpl<T extends HTMLElement, V extends object | string>
 
   readonly id: string
   readonly node: LGraphNode
-  mouseDownHandler?: (event: MouseEvent) => void
 
   constructor(obj: {
     id: string
@@ -87,15 +90,6 @@ export class DOMWidgetImpl<T extends HTMLElement, V extends object | string>
 
     this.id = obj.id
     this.node = obj.node
-
-    if (this.element.blur) {
-      this.mouseDownHandler = (event) => {
-        if (!this.element.contains(event.target as HTMLElement)) {
-          this.element.blur()
-        }
-      }
-      document.addEventListener('mousedown', this.mouseDownHandler)
-    }
   }
 
   get value(): V {
@@ -164,10 +158,6 @@ export class DOMWidgetImpl<T extends HTMLElement, V extends object | string>
   }
 
   onRemove(): void {
-    if (this.mouseDownHandler) {
-      document.removeEventListener('mousedown', this.mouseDownHandler)
-    }
-    this.element.remove()
     useDomWidgetStore().unregisterWidget(this.id)
   }
 }
@@ -182,22 +172,20 @@ LGraphNode.prototype.addDOMWidget = function <
   element: T,
   options: DOMWidgetOptions<T, V> = {}
 ): DOMWidget<T, V> {
-  options = { hideOnZoom: true, selectOn: ['focus', 'click'], ...options }
-
-  const { nodeData } = this.constructor
-  const tooltip = nodeData?.inputs?.[name]?.tooltip
-  if (tooltip && !element.title) {
-    element.title = tooltip
-  }
   // Note: Before `LGraphNode.configure` is called, `this.id` is always `-1`.
-  const widget = new DOMWidgetImpl({
-    id: generateUUID(),
-    node: this,
-    name,
-    type,
-    element,
-    options
-  })
+  const widget = this.addCustomWidget(
+    new DOMWidgetImpl({
+      id: generateUUID(),
+      node: this,
+      name,
+      type,
+      element,
+      options: {
+        ...options,
+        hideOnZoom: true
+      }
+    })
+  )
 
   // Workaround for https://github.com/Comfy-Org/ComfyUI_frontend/issues/2493
   // Some custom nodes are explicitly expecting getter and setter of `value`
@@ -211,17 +199,6 @@ LGraphNode.prototype.addDOMWidget = function <
       this.callback?.(this.value)
     }
   })
-
-  // Ensure selectOn exists before iteration
-  const selectEvents = options.selectOn ?? ['focus', 'click']
-  for (const evt of selectEvents) {
-    element.addEventListener(evt, () => {
-      app.canvas.selectNode(this)
-      app.canvas.bringToFront(this)
-    })
-  }
-
-  this.addCustomWidget(widget)
 
   this.onRemoved = useChainCallback(this.onRemoved, () => {
     widget.onRemove()
