@@ -69,6 +69,7 @@ export class DOMWidgetImpl<T extends HTMLElement, V extends object | string>
   readonly element: T
   readonly options: DOMWidgetOptions<T, V>
   computedHeight?: number
+  y: number = 0
   callback?: (value: V) => void
 
   readonly id: string
@@ -181,8 +182,8 @@ LGraphNode.prototype.addDOMWidget = function <
       type,
       element,
       options: {
-        ...options,
-        hideOnZoom: true
+        hideOnZoom: true,
+        ...options
       }
     })
   )
