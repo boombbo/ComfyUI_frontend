@@ -337,14 +337,6 @@ export const generateUUID = (): string => {
 }
 
 /**
- * Formats a number to a locale-specific string
- * @param num The number to format
- * @returns The formatted number or 'N/A' if the number is undefined
- */
-export const formatNumber = (num?: number): string =>
-  num?.toLocaleString() ?? 'N/A'
-
-/**
  * Checks if a URL is a Civitai model URL
  * @example
  * isCivitaiModelUrl('https://civitai.com/api/download/models/1234567890') // true
@@ -364,4 +356,31 @@ export const isCivitaiModelUrl = (url: string): boolean => {
     /^\/api\/v1\/models\/(\d+)$/.test(pathname) ||
     /^\/api\/v1\/models-versions\/(\d+)$/.test(pathname)
   )
+}
+
+/**
+ * Converts a Hugging Face download URL to a repository page URL
+ * @param url The download URL to convert
+ * @returns The repository page URL or the original URL if conversion fails
+ * @example
+ * downloadUrlToHfRepoUrl(
+ *  'https://huggingface.co/bfl/FLUX.1/resolve/main/flux1-canny-dev.safetensors?download=true'
+ * ) // https://huggingface.co/bfl/FLUX.1
+ */
+export const downloadUrlToHfRepoUrl = (url: string): string => {
+  try {
+    const urlObj = new URL(url)
+    const pathname = urlObj.pathname
+
+    // Use regex to match everything before /resolve/ or /blob/
+    const regex = /^(.*?)(?:\/resolve\/|\/blob\/|$)/
+    const repoPathMatch = regex.exec(pathname)
+
+    // Extract the repository path and remove leading slash if present
+    const repoPath = repoPathMatch?.[1]?.replace(/^\//, '') || ''
+
+    return `https://huggingface.co/${repoPath}`
+  } catch (error) {
+    return url
+  }
 }

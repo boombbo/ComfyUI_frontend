@@ -1,6 +1,7 @@
 import { whenever } from '@vueuse/core'
+import { partition } from 'lodash'
 import { defineStore } from 'pinia'
-import { ref } from 'vue'
+import { ref, watchEffect } from 'vue'
 
 import { useCachedRequest } from '@/composables/useCachedRequest'
 import { useManagerQueue } from '@/composables/useManagerQueue'
@@ -9,6 +10,7 @@ import {
   InstallPackParams,
   InstalledPacksResponse,
   ManagerPackInfo,
+  ManagerPackInstalled,
   UpdateAllPacksParams
 } from '@/types/comfyManagerTypes'
 
@@ -18,18 +20,61 @@ import {
 export const useComfyManagerStore = defineStore('comfyManager', () => {
   const managerService = useComfyManagerService()
   const installedPacks = ref<InstalledPacksResponse>({})
+  const enabledPacksIds = ref<Set<string>>(new Set())
+  const disabledPacksIds = ref<Set<string>>(new Set())
+  const installedPacksIds = ref<Set<string>>(new Set())
   const isStale = ref(true)
 
   const { statusMessage, allTasksDone, enqueueTask } = useManagerQueue()
+
+  const setStale = () => {
+    isStale.value = true
+  }
+
+  /**
+   * A pack is disabled if there is a disabled entry and no corresponding enabled entry
+   * @example
+   * installedPacks = {
+   *   "packname@1_0_2": { enabled: false, cnr_id: "packname" },
+   *   "packname": { enabled: true, cnr_id: "packname" }
+   * }
+   * isDisabled("packname") // false
+   *
+   * installedPacks = {
+   *   "packname@1_0_2": { enabled: false, cnr_id: "packname" },
+   * }
+   * isDisabled("packname") // true
+   */
+  const isDisabledPack = (pack: ManagerPackInstalled) =>
+    pack.enabled === false && pack.cnr_id && !installedPacks.value[pack.cnr_id]
+
+  const isInstalledPackId = (packName: string | undefined): boolean =>
+    !!packName && installedPacksIds.value.has(packName)
+
+  const isEnabledPackId = (packName: string | undefined): boolean =>
+    !!packName &&
+    isInstalledPackId(packName) &&
+    enabledPacksIds.value.has(packName)
+
+  const packsToIdSet = (packs: ManagerPackInstalled[]) =>
+    packs.reduce((acc, pack) => {
+      const id = pack.cnr_id || pack.aux_id
+      if (id) acc.add(id)
+      return acc
+    }, new Set<string>())
+
+  watchEffect(() => {
+    const packs = Object.values(installedPacks.value)
+    const [disabled, enabled] = partition(packs, isDisabledPack)
+    enabledPacksIds.value = packsToIdSet(enabled)
+    disabledPacksIds.value = packsToIdSet(disabled)
+    installedPacksIds.value = packsToIdSet(packs)
+  })
 
   const refreshInstalledList = async () => {
     const packs = await managerService.listInstalledPacks()
     if (packs) installedPacks.value = packs
     isStale.value = false
-  }
-
-  const setStale = () => {
-    isStale.value = true
   }
 
   whenever(isStale, refreshInstalledList, { immediate: true })
@@ -84,16 +129,6 @@ export const useComfyManagerStore = defineStore('comfyManager', () => {
     })
   }
 
-  const isPackInstalled = (packName: string | undefined): boolean => {
-    if (!packName) return false
-    return !!installedPacks.value[packName]
-  }
-
-  const isPackEnabled = (packName: string | undefined): boolean => {
-    if (!packName) return false
-    return !!installedPacks.value[packName]?.enabled
-  }
-
   return {
     // Manager state
     isLoading: managerService.isLoading,
@@ -103,8 +138,8 @@ export const useComfyManagerStore = defineStore('comfyManager', () => {
 
     // Installed packs state
     installedPacks,
-    isPackInstalled,
-    isPackEnabled,
+    isPackInstalled: isInstalledPackId,
+    isPackEnabled: isEnabledPackId,
 
     // Pack actions
     installPack,
