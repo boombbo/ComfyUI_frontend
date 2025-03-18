@@ -18,17 +18,15 @@
         v-model:selectedTab="selectedTab"
       />
       <div
-        class="flex-1 overflow-auto"
+        class="flex-1 overflow-auto pr-80"
         :class="{
           'transition-all duration-300': isSmallScreen,
           'pl-80': isSideNavOpen || !isSmallScreen,
-          'pl-8': !isSideNavOpen && isSmallScreen,
-          'pr-80': showInfoPanel
+          'pl-8': !isSideNavOpen && isSmallScreen
         }"
       >
         <div class="px-6 pt-6 flex flex-col h-full">
           <RegistrySearchBar
-            v-if="!hideSearchBar"
             v-model:searchQuery="searchQuery"
             v-model:searchMode="searchMode"
             :searchResults="searchResults"
@@ -57,29 +55,22 @@
             <div v-else class="h-full" @click="handleGridContainerClick">
               <VirtualGrid
                 :items="resultsWithKeys"
-                :defaultItemSize="DEFAULT_CARD_SIZE"
-                class="p-0 m-0 max-w-full"
-                :buffer-rows="2"
+                :buffer-rows="5"
                 :gridStyle="{
                   display: 'grid',
-                  gridTemplateColumns: `repeat(auto-fill, minmax(${DEFAULT_CARD_SIZE}px, 1fr))`,
+                  gridTemplateColumns: 'repeat(auto-fill, minmax(22rem, 1fr))',
                   padding: '0.5rem',
-                  gap: '1.125rem 1.25rem',
-                  justifyContent: 'stretch'
+                  gap: '1.5rem'
                 }"
               >
                 <template #item="{ item }">
-                  <div
-                    class="relative w-full aspect-square cursor-pointer"
+                  <PackCard
                     @click.stop="(event) => selectNodePack(item, event)"
-                  >
-                    <PackCard
-                      :node-pack="item"
-                      :is-selected="
-                        selectedNodePacks.some((pack) => pack.id === item.id)
-                      "
-                    />
-                  </div>
+                    :node-pack="item"
+                    :is-selected="
+                      selectedNodePacks.some((pack) => pack.id === item.id)
+                    "
+                  />
                 </template>
               </VirtualGrid>
             </div>
@@ -87,7 +78,6 @@
         </div>
       </div>
       <div
-        v-if="showInfoPanel"
         class="w-80 border-l-0 border-surface-border absolute right-0 top-0 bottom-0 flex z-20"
       >
         <ContentDivider orientation="vertical" :width="0.2" />
@@ -124,8 +114,6 @@ import { useComfyManagerStore } from '@/stores/comfyManagerStore'
 import type { TabItem } from '@/types/comfyManagerTypes'
 import { components } from '@/types/comfyRegistryTypes'
 
-const DEFAULT_CARD_SIZE = 512
-
 const { t } = useI18n()
 const comfyManagerStore = useComfyManagerStore()
 
@@ -134,7 +122,6 @@ const {
   isOpen: isSideNavOpen,
   toggle: toggleSideNav
 } = useResponsiveCollapse()
-const hideSearchBar = computed(() => isSmallScreen.value && showInfoPanel.value)
 
 const tabs = ref<TabItem[]>([
   { id: 'all', label: t('g.all'), icon: 'pi-list' },
@@ -220,6 +207,5 @@ const handleGridContainerClick = (event: MouseEvent) => {
   }
 }
 
-const showInfoPanel = computed(() => selectedNodePacks.value.length > 0)
 const hasMultipleSelections = computed(() => selectedNodePacks.value.length > 1)
 </script>

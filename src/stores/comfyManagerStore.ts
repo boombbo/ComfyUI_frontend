@@ -6,6 +6,7 @@ import { useCachedRequest } from '@/composables/useCachedRequest'
 import { useManagerQueue } from '@/composables/useManagerQueue'
 import { useServerLogs } from '@/composables/useServerLogs'
 import { useComfyManagerService } from '@/services/comfyManagerService'
+import { useDialogService } from '@/services/dialogService'
 import {
   InstallPackParams,
   InstalledPacksResponse,
@@ -20,6 +21,8 @@ import {
  */
 export const useComfyManagerStore = defineStore('comfyManager', () => {
   const managerService = useComfyManagerService()
+  const { showManagerProgressDialog } = useDialogService()
+
   const installedPacks = ref<InstalledPacksResponse>({})
   const enabledPacksIds = ref<Set<string>>(new Set())
   const disabledPacksIds = ref<Set<string>>(new Set())
@@ -110,6 +113,7 @@ export const useComfyManagerStore = defineStore('comfyManager', () => {
   }
 
   whenever(isStale, refreshInstalledList, { immediate: true })
+  whenever(uncompletedCount, () => showManagerProgressDialog())
 
   const withLogs = (task: () => Promise<null>, taskName: string) => {
     const { startListening, stopListening, logs } = useServerLogs()
@@ -178,6 +182,11 @@ export const useComfyManagerStore = defineStore('comfyManager', () => {
     enqueueTask(withLogs(task, `Disabling ${params.id}`))
   }
 
+  const getInstalledPackVersion = (packId: string) => {
+    const pack = installedPacks.value[packId]
+    return pack?.ver
+  }
+
   const clearLogs = () => {
     taskLogs.value = []
   }
@@ -197,6 +206,7 @@ export const useComfyManagerStore = defineStore('comfyManager', () => {
     installedPacksIds,
     isPackInstalled: isInstalledPackId,
     isPackEnabled: isEnabledPackId,
+    getInstalledPackVersion,
 
     // Pack actions
     installPack,
@@ -207,3 +217,33 @@ export const useComfyManagerStore = defineStore('comfyManager', () => {
     enablePack: installPack // Enable is done via install endpoint with a disabled pack
   }
 })
+
+/**
+ * Store for state of the manager progress dialog content.
+ * The dialog itself is managed by the dialog store. This store is used to
+ * manage the visibility of the dialog's content, header, footer.
+ */
+export const useManagerProgressDialogStore = defineStore(
+  'managerProgressDialog',
+  () => {
+    const isExpanded = ref(false)
+
+    const toggle = () => {
+      isExpanded.value = !isExpanded.value
+    }
+
+    const collapse = () => {
+      isExpanded.value = false
+    }
+
+    const expand = () => {
+      isExpanded.value = true
+    }
+    return {
+      isExpanded,
+      toggle,
+      collapse,
+      expand
+    }
+  }
+)

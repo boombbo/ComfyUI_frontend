@@ -32,9 +32,7 @@
             class="ml-2"
           />
           <TreeExplorer
-            :roots="
-              renderTreeNode(openWorkflowsTree, WorkflowTreeType.Open).children
-            "
+            :root="renderTreeNode(openWorkflowsTree, WorkflowTreeType.Open)"
             :selectionKeys="selectionKeys"
           >
             <template #node="{ node }">
@@ -70,11 +68,11 @@
             class="ml-2"
           />
           <TreeExplorer
-            :roots="
+            :root="
               renderTreeNode(
                 bookmarkedWorkflowsTree,
                 WorkflowTreeType.Bookmarks
-              ).children
+              )
             "
             :selectionKeys="selectionKeys"
           >
@@ -90,9 +88,7 @@
             class="ml-2"
           />
           <TreeExplorer
-            :roots="
-              renderTreeNode(workflowsTree, WorkflowTreeType.Browse).children
-            "
+            :root="renderTreeNode(workflowsTree, WorkflowTreeType.Browse)"
             v-model:expandedKeys="expandedKeys"
             :selectionKeys="selectionKeys"
             v-if="workflowStore.persistedWorkflows.length > 0"
@@ -111,9 +107,7 @@
       </div>
       <div class="comfyui-workflows-search-panel" v-else>
         <TreeExplorer
-          :roots="
-            renderTreeNode(filteredRoot, WorkflowTreeType.Browse).children
-          "
+          :root="renderTreeNode(filteredRoot, WorkflowTreeType.Browse)"
           v-model:expandedKeys="expandedKeys"
         >
           <template #node="{ node }">
@@ -142,7 +136,6 @@ import SidebarTabTemplate from '@/components/sidebar/tabs/SidebarTabTemplate.vue
 import WorkflowTreeLeaf from '@/components/sidebar/tabs/workflows/WorkflowTreeLeaf.vue'
 import { useTreeExpansion } from '@/composables/useTreeExpansion'
 import { useWorkflowService } from '@/services/workflowService'
-import { useCommandStore } from '@/stores/commandStore'
 import { useSettingStore } from '@/stores/settingStore'
 import {
   useWorkflowBookmarkStore,
@@ -180,7 +173,6 @@ const handleSearch = (query: string) => {
   })
 }
 
-const commandStore = useCommandStore()
 const workflowStore = useWorkflowStore()
 const workflowService = useWorkflowService()
 const workspaceStore = useWorkspaceStore()
