@@ -166,6 +166,7 @@
     "loadWorkflow": "ワークフローを読み込む",
     "loading": "読み込み中",
     "logs": "ログ",
+    "missing": "不足している",
     "name": "名前",
     "newFolder": "新しいフォルダー",
     "next": "次へ",
@@ -381,6 +382,7 @@
   },
   "manager": {
     "createdBy": "作成者",
+    "dependencies": "依存関係",
     "discoverCommunityContent": "コミュニティが作成したノードパック、拡張機能などを探す...",
     "downloads": "ダウンロード",
     "errorConnecting": "Comfy Node Registryへの接続エラー。",
@@ -389,6 +391,7 @@
       "enabled": "有効",
       "nodePack": "ノードパック"
     },
+    "inWorkflow": "ワークフロー内",
     "infoPanelEmpty": "アイテムをクリックして情報を表示します",
     "installSelected": "選択したものをインストール",
     "lastUpdated": "最終更新日",

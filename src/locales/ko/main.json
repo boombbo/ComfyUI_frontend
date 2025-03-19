@@ -166,6 +166,7 @@
     "loadWorkflow": "워크플로 로드",
     "loading": "로딩 중",
     "logs": "로그",
+    "missing": "누락됨",
     "name": "이름",
     "newFolder": "새 폴더",
     "next": "다음",
@@ -381,6 +382,7 @@
   },
   "manager": {
     "createdBy": "작성자",
+    "dependencies": "의존성",
     "discoverCommunityContent": "커뮤니티에서 만든 노드 팩, 확장 프로그램 등을 찾아보세요...",
     "downloads": "다운로드",
     "errorConnecting": "Comfy Node Registry에 연결하는 중 오류가 발생했습니다.",
@@ -389,6 +391,7 @@
       "enabled": "활성화",
       "nodePack": "노드 팩"
     },
+    "inWorkflow": "워크플로우 내",
     "infoPanelEmpty": "정보를 보려면 항목을 클릭하세요",
     "installSelected": "선택한 항목 설치",
     "lastUpdated": "마지막 업데이트",
