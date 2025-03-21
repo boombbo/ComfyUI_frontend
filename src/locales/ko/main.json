@@ -74,6 +74,7 @@
     "LOAD_3D": "3D 로드",
     "LOAD_3D_ANIMATION": "3D 애니메이션 로드",
     "MASK": "마스크",
+    "MESH": "메시",
     "MODEL": "모델",
     "NOISE": "노이즈",
     "PHOTOMAKER": "PHOTOMAKER",
@@ -84,6 +85,7 @@
     "TIMESTEPS_RANGE": "타임스텝 범위",
     "UPSCALE_MODEL": "업스케일 모델",
     "VAE": "VAE",
+    "VOXEL": "복셀",
     "WEBCAM": "웹캠"
   },
   "desktopMenu": {
@@ -891,6 +893,9 @@
     },
     "template": {
       "3D": {
+        "hunyuan-3d-multiview-elf": "Hunyuan3D 다중뷰",
+        "hunyuan-3d-turbo": "Hunyuan3D 터보",
+        "hunyuan3d-non-multiview-train": "Hunyuan3D",
         "stable_zero123_example": "스테이블 제로123"
       },
       "Area Composition": {
