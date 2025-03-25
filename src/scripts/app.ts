@@ -11,7 +11,7 @@ import _ from 'lodash'
 import type { ToastMessageOptions } from 'primevue/toast'
 import { reactive } from 'vue'
 
-import { st } from '@/i18n'
+import { st, t } from '@/i18n'
 import type { ResultItem } from '@/schemas/apiSchema'
 import {
   type ComfyWorkflowJSON,
@@ -450,32 +450,31 @@ export class ComfyApp {
           return
         }
         // Dragging from Chrome->Firefox there is a file but its a bmp, so ignore that
+        if (!event.dataTransfer) return
         if (
-          // @ts-expect-error fixme ts strict error
           event.dataTransfer.files.length &&
-          // @ts-expect-error fixme ts strict error
           event.dataTransfer.files[0].type !== 'image/bmp'
         ) {
-          // @ts-expect-error fixme ts strict error
           await this.handleFile(event.dataTransfer.files[0])
         } else {
           // Try loading the first URI in the transfer list
           const validTypes = ['text/uri-list', 'text/x-moz-url']
-          // @ts-expect-error fixme ts strict error
           const match = [...event.dataTransfer.types].find((t) =>
             validTypes.find((v) => t === v)
           )
           if (match) {
-            // @ts-expect-error fixme ts strict error
             const uri = event.dataTransfer.getData(match)?.split('\n')?.[0]
             if (uri) {
-              await this.handleFile(await (await fetch(uri)).blob())
+              await this.handleFile(
+                new File([await (await fetch(uri)).blob()], uri)
+              )
             }
           }
         }
       } catch (err: any) {
-        console.error('Unable to process dropped item:', err)
-        useToastStore().addAlert(`Unable to process dropped item: ${err}`)
+        useToastStore().addAlert(
+          t('toastMessages.dropFileError', { error: err })
+        )
       }
     })
 
@@ -1144,56 +1143,10 @@ export class ComfyApp {
         this.canvas.ds.scale = graphData.extra.ds.scale
       }
     } catch (error) {
-      let errorHint = []
-      // Try extracting filename to see if it was caused by an extension script
-      const filename =
-        // @ts-expect-error fixme ts strict error
-        error.fileName ||
-        // @ts-expect-error fixme ts strict error
-        (error.stack || '').match(/(\/extensions\/.*\.js)/)?.[1]
-      const pos = (filename || '').indexOf('/extensions/')
-      if (pos > -1) {
-        errorHint.push(
-          $el('span', {
-            textContent: 'This may be due to the following script:'
-          }),
-          $el('br'),
-          $el('span', {
-            style: {
-              fontWeight: 'bold'
-            },
-            textContent: filename.substring(pos)
-          })
-        )
-      }
-
-      // Show dialog to let the user know something went wrong loading the data
-      this.ui.dialog.show(
-        $el('div', [
-          $el('p', {
-            textContent: 'Loading aborted due to error reloading workflow data'
-          }),
-          $el('pre', {
-            style: { padding: '5px', backgroundColor: 'rgba(255,0,0,0.2)' },
-            // @ts-expect-error fixme ts strict error
-            textContent: error.toString()
-          }),
-          $el('pre', {
-            style: {
-              padding: '5px',
-              color: '#ccc',
-              fontSize: '10px',
-              maxHeight: '50vh',
-              overflow: 'auto',
-              backgroundColor: 'rgba(0,0,0,0.2)'
-            },
-            // @ts-expect-error fixme ts strict error
-            textContent: error.stack || 'No stacktrace available'
-          }),
-          ...errorHint
-        ]).outerHTML
-      )
-
+      useDialogService().showErrorDialog(error, {
+        title: t('errorDialog.loadWorkflowTitle'),
+        errorType: 'loadWorkflowError'
+      })
       return
     }
     for (const node of this.graph.nodes) {
@@ -1318,8 +1271,7 @@ export class ComfyApp {
 
     // Only have one action process the items so each one gets a unique seed correctly
     if (this.#processingQueue) {
-      // @ts-expect-error fixme ts strict error
-      return
+      return false
     }
 
     this.#processingQueue = true
@@ -1384,12 +1336,9 @@ export class ComfyApp {
     return !this.lastNodeErrors
   }
 
-  // @ts-expect-error fixme ts strict error
-  showErrorOnFileLoad(file) {
-    this.ui.dialog.show(
-      $el('div', [
-        $el('p', { textContent: `Unable to find workflow in ${file.name}` })
-      ]).outerHTML
+  showErrorOnFileLoad(file: File) {
+    useToastStore().addAlert(
+      t('toastMessages.fileLoadError', { fileName: file.name })
     )
   }
 
@@ -1397,10 +1346,8 @@ export class ComfyApp {
    * Loads workflow data from the specified file
    * @param {File} file
    */
-  // @ts-expect-error fixme ts strict error
-  async handleFile(file) {
-    // @ts-expect-error fixme ts strict error
-    const removeExt = (f) => {
+  async handleFile(file: File) {
+    const removeExt = (f: string) => {
       if (!f) return f
       const p = f.lastIndexOf('.')
       if (p === -1) return f
@@ -1655,8 +1602,8 @@ export class ComfyApp {
   async refreshComboInNodes() {
     const requestToastMessage: ToastMessageOptions = {
       severity: 'info',
-      summary: 'Update',
-      detail: 'Update requested'
+      summary: t('g.update'),
+      detail: t('toastMessages.updateRequested')
     }
     if (this.vueAppReady) {
       useToastStore().add(requestToastMessage)
@@ -1698,8 +1645,8 @@ export class ComfyApp {
       useToastStore().remove(requestToastMessage)
       useToastStore().add({
         severity: 'success',
-        summary: 'Updated',
-        detail: 'Node definitions updated',
+        summary: t('g.updated'),
+        detail: t('toastMessages.nodeDefinitionsUpdated'),
         life: 1000
       })
     }

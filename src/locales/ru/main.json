@@ -115,6 +115,12 @@
     "paused": "Приостановлено",
     "resume": "Возобновить загрузку"
   },
+  "errorDialog": {
+    "defaultTitle": "Произошла ошибка",
+    "extensionFileHint": "Это может быть связано со следующим скриптом",
+    "loadWorkflowTitle": "Загрузка прервана из-за ошибки при перезагрузке данных рабочего процесса",
+    "noStackTrace": "Стек вызовов недоступен"
+  },
   "g": {
     "about": "О программе",
     "add": "Добавить",
@@ -132,6 +138,7 @@
     "community": "Сообщество",
     "completed": "Завершено",
     "confirm": "Подтвердить",
+    "confirmed": "Подтверждено",
     "continue": "Продолжить",
     "control_after_generate": "управление после генерации",
     "control_before_generate": "управление до генерации",
@@ -165,6 +172,7 @@
     "install": "Установить",
     "installed": "Установлено",
     "installing": "Установка",
+    "interrupted": "Прервано",
     "keybinding": "Привязка клавиш",
     "loadAllFolders": "Загрузить все папки",
     "loadWorkflow": "Загрузить рабочий процесс",
@@ -211,6 +219,7 @@
     "success": "Успех",
     "systemInfo": "Информация о системе",
     "terminal": "Терминал",
+    "update": "Обновить",
     "updated": "Обновлено",
     "upload": "Загрузить",
     "videoFailedToLoad": "Не удалось загрузить видео",
@@ -968,6 +977,29 @@
       }
     },
     "title": "Начните с шаблона"
+  },
+  "toastMessages": {
+    "couldNotDetermineFileType": "Не удалось определить тип файла",
+    "dropFileError": "Не удалось обработать перетаскиваемый элемент: {error}",
+    "emptyCanvas": "Пустой холст",
+    "errorCopyImage": "Ошибка копирования изображения: {error}",
+    "errorLoadingModel": "Ошибка загрузки модели",
+    "errorSaveSetting": "Ошибка сохранения настройки {id}: {err}",
+    "failedToApplyTexture": "Не удалось применить текстуру",
+    "failedToDownloadFile": "Не удалось скачать файл",
+    "failedToExportModel": "Не удалось экспортировать модель как {format}",
+    "fileLoadError": "Не удалось найти рабочий процесс в {fileName}",
+    "fileUploadFailed": "Не удалось загрузить файл",
+    "interrupted": "Выполнение было прервано",
+    "no3dScene": "Нет 3D сцены для применения текстуры",
+    "no3dSceneToExport": "Нет 3D сцены для экспорта",
+    "noTemplatesToExport": "Нет шаблонов для экспорта",
+    "nodeDefinitionsUpdated": "Определения узлов обновлены",
+    "nothingToGroup": "Нечего группировать",
+    "pendingTasksDeleted": "Ожидающие задачи удалены",
+    "pleaseSelectNodesToGroup": "Пожалуйста, выберите узлы (или другие группы) для создания группы",
+    "unableToGetModelFilePath": "Не удалось получить путь к файлу модели",
+    "updateRequested": "Запрошено обновление"
   },
   "userSelect": {
     "enterUsername": "Введите имя пользователя",
