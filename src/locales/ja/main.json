@@ -119,7 +119,8 @@
     "defaultTitle": "エラーが発生しました",
     "extensionFileHint": "これは次のスクリプトが原因かもしれません",
     "loadWorkflowTitle": "ワークフローデータの再読み込みエラーにより、読み込みが中止されました",
-    "noStackTrace": "スタックトレースは利用できません"
+    "noStackTrace": "スタックトレースは利用できません",
+    "promptExecutionError": "プロンプトの実行に失敗しました"
   },
   "g": {
     "about": "情報",
@@ -995,6 +996,7 @@
     "failedToApplyTexture": "テクスチャの適用に失敗しました",
     "failedToDownloadFile": "ファイルのダウンロードに失敗しました",
     "failedToExportModel": "{format}としてモデルのエクスポートに失敗しました",
+    "failedToFetchLogs": "サーバーログの取得に失敗しました",
     "fileLoadError": "{fileName}でワークフローが見つかりません",
     "fileUploadFailed": "ファイルのアップロードに失敗しました",
     "interrupted": "実行が中断されました",

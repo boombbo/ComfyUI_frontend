@@ -119,7 +119,8 @@
     "defaultTitle": "Ocurrió un error",
     "extensionFileHint": "Esto puede deberse al siguiente script",
     "loadWorkflowTitle": "La carga se interrumpió debido a un error al recargar los datos del flujo de trabajo",
-    "noStackTrace": "No hay seguimiento de pila disponible"
+    "noStackTrace": "No hay seguimiento de pila disponible",
+    "promptExecutionError": "La ejecución del prompt falló"
   },
   "g": {
     "about": "Acerca de",
@@ -995,6 +996,7 @@
     "failedToApplyTexture": "Error al aplicar textura",
     "failedToDownloadFile": "Error al descargar el archivo",
     "failedToExportModel": "Error al exportar modelo como {format}",
+    "failedToFetchLogs": "Error al obtener los registros del servidor",
     "fileLoadError": "No se puede encontrar el flujo de trabajo en {fileName}",
     "fileUploadFailed": "Error al subir el archivo",
     "interrupted": "La ejecución ha sido interrumpida",
