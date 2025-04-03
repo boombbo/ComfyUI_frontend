@@ -62,6 +62,7 @@ import { usePaste } from '@/composables/usePaste'
 import { useWorkflowPersistence } from '@/composables/useWorkflowPersistence'
 import { CORE_SETTINGS } from '@/constants/coreSettings'
 import { i18n } from '@/i18n'
+import type { NodeId } from '@/schemas/comfyWorkflowSchema'
 import { UnauthorizedError, api } from '@/scripts/api'
 import { app as comfyApp } from '@/scripts/app'
 import { ChangeTracker } from '@/scripts/changeTracker'
@@ -165,11 +166,10 @@ watch(
 watch(
   () =>
     [executionStore.executingNodeId, executionStore.executingNodeProgress] as [
-      string | null,
+      NodeId | null,
       number | null
     ],
   ([executingNodeId, executingNodeProgress]) => {
-    if (!executingNodeId) return
     for (const node of comfyApp.graph.nodes) {
       if (node.id == executingNodeId) {
         node.progress = executingNodeProgress ?? undefined
