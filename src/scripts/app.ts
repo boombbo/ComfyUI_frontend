@@ -11,6 +11,7 @@ import type { ToastMessageOptions } from 'primevue/toast'
 import { reactive } from 'vue'
 
 import { useCanvasPositionConversion } from '@/composables/element/useCanvasPositionConversion'
+import { useWorkflowValidation } from '@/composables/useWorkflowValidation'
 import { st, t } from '@/i18n'
 import type {
   ExecutionErrorWsMessage,
@@ -21,8 +22,7 @@ import {
   ComfyApiWorkflow,
   type ComfyWorkflowJSON,
   type ModelFile,
-  type NodeId,
-  validateComfyWorkflow
+  type NodeId
 } from '@/schemas/comfyWorkflowSchema'
 import type { ComfyNodeDef as ComfyNodeDefV1 } from '@/schemas/nodeDefSchema'
 import { getFromWebmFile } from '@/scripts/metadata/ebml'
@@ -47,7 +47,11 @@ import type { ComfyExtension, MissingNodeType } from '@/types/comfy'
 import { ExtensionManager } from '@/types/extensionTypes'
 import { ColorAdjustOptions, adjustColor } from '@/utils/colorUtil'
 import { graphToPrompt } from '@/utils/executionUtil'
-import { executeWidgetsCallback, isImageNode } from '@/utils/litegraphUtil'
+import {
+  executeWidgetsCallback,
+  fixLinkInputSlots,
+  isImageNode
+} from '@/utils/litegraphUtil'
 import {
   findLegacyRerouteNodes,
   noNativeReroutes
@@ -705,7 +709,9 @@ export class ComfyApp {
   #addAfterConfigureHandler() {
     const app = this
     const onConfigure = app.graph.onConfigure
-    app.graph.onConfigure = function (...args) {
+    app.graph.onConfigure = function (this: LGraph, ...args) {
+      fixLinkInputSlots(this)
+
       // Fire callbacks before the onConfigure, this is used by widget inputs to setup the config
       for (const node of app.graph.nodes) {
         node.onGraphConfigured?.()
@@ -975,13 +981,9 @@ export class ComfyApp {
     graphData = clone(graphData)
 
     if (useSettingStore().get('Comfy.Validation.Workflows')) {
-      // TODO: Show validation error in a dialog.
-      const validatedGraphData = await validateComfyWorkflow(
-        graphData,
-        /* onError=*/ (err) => {
-          useToastStore().addAlert(err)
-        }
-      )
+      const { graphData: validatedGraphData } =
+        await useWorkflowValidation().validateWorkflow(graphData)
+
       // If the validation failed, use the original graph data.
       // Ideally we should not block users from loading the workflow.
       graphData = validatedGraphData ?? graphData
