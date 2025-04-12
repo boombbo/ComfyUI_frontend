@@ -198,8 +198,9 @@
     "reportIssue": "Отправить отчёт",
     "reportIssueTooltip": "Отправить отчёт об ошибке в Comfy Org",
     "reportSent": "Отчёт отправлен",
-    "reset": "Сбросить",
-    "resetKeybindingsTooltip": "Сбросить сочетания клавиш по умолчанию",
+    "reset": "Сброс",
+    "resetAll": "Сбросить все",
+    "resetAllKeybindingsTooltip": "Сбросить все сочетания клавиш по умолчанию",
     "restart": "Перезапустить",
     "resultsCount": "Найдено {count} результатов",
     "save": "Сохранить",
@@ -428,6 +429,8 @@
     "loadingVersions": "Загрузка версий...",
     "nightlyVersion": "Ночная",
     "noDescription": "Описание отсутствует",
+    "noNodesFound": "Узлы не найдены",
+    "noNodesFoundDescription": "Узлы пакета не могут быть проанализированы, или пакет является только расширением интерфейса и не имеет узлов.",
     "noResultsFound": "По вашему запросу ничего не найдено.",
     "nodePack": "Пакет Узлов",
     "packsSelected": "Выбрано пакетов",
@@ -436,8 +439,10 @@
     "searchPlaceholder": "Поиск",
     "selectVersion": "Выберите версию",
     "sort": {
+      "created": "Новейшие",
       "downloads": "Самые популярные",
-      "rating": "Рейтинг"
+      "publisher": "Издатель",
+      "updated": "Недавно обновленные"
     },
     "status": {
       "active": "Активный",
