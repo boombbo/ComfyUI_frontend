@@ -16,6 +16,7 @@ import { defineStore } from 'pinia'
 import { computed, ref } from 'vue'
 import { useFirebaseAuth } from 'vuefire'
 
+import { COMFY_API_BASE_URL } from '@/config/comfyApi'
 import { t } from '@/i18n'
 import { useDialogService } from '@/services/dialogService'
 import { operations } from '@/types/comfyRegistryTypes'
@@ -35,9 +36,6 @@ type AccessBillingPortalResponse =
 type AccessBillingPortalReqBody =
   operations['AccessBillingPortal']['requestBody']
 
-// TODO: Switch to prod api based on environment (requires prod api to be ready)
-const API_BASE_URL = 'https://stagingapi.comfy.org'
-
 export const useFirebaseAuthStore = defineStore('firebaseAuth', () => {
   // State
   const loading = ref(false)
@@ -45,6 +43,7 @@ export const useFirebaseAuthStore = defineStore('firebaseAuth', () => {
   const currentUser = ref<User | null>(null)
   const isInitialized = ref(false)
   const customerCreated = ref(false)
+  const isFetchingBalance = ref(false)
 
   // Balance state
   const balance = ref<GetCustomerBalanceResponse | null>(null)
@@ -95,39 +94,48 @@ export const useFirebaseAuthStore = defineStore('firebaseAuth', () => {
   }
 
   const fetchBalance = async (): Promise<GetCustomerBalanceResponse | null> => {
-    const token = await getIdToken()
-    if (!token) {
-      error.value = 'Cannot fetch balance: User not authenticated'
-      return null
-    }
-
-    const response = await fetch(`${API_BASE_URL}/customers/balance`, {
-      headers: {
-        Authorization: `Bearer ${token}`
-      }
-    })
-
-    if (!response.ok) {
-      if (response.status === 404) {
-        // Customer not found is expected for new users
+    isFetchingBalance.value = true
+    try {
+      const token = await getIdToken()
+      if (!token) {
+        error.value = 'Cannot fetch balance: User not authenticated'
+        isFetchingBalance.value = false
         return null
       }
-      const errorData = await response.json()
-      error.value = `Failed to fetch balance: ${errorData.message}`
-      return null
-    }
 
-    const balanceData = await response.json()
-    // Update the last balance update time
-    lastBalanceUpdateTime.value = new Date()
-    balance.value = balanceData
-    return balanceData
+      const response = await fetch(`${COMFY_API_BASE_URL}/customers/balance`, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      })
+
+      if (!response.ok) {
+        if (response.status === 404) {
+          // Customer not found is expected for new users
+          return null
+        }
+        const errorData = await response.json()
+        error.value = `Failed to fetch balance: ${errorData.message}`
+        return null
+      }
+
+      const balanceData = await response.json()
+      // Update the last balance update time
+      lastBalanceUpdateTime.value = new Date()
+      balance.value = balanceData
+      return balanceData
+    } catch (e) {
+      error.value = `Failed to fetch balance: ${e}`
+      return null
+    } finally {
+      isFetchingBalance.value = false
+    }
   }
 
   const createCustomer = async (
     token: string
   ): Promise<CreateCustomerResponse> => {
-    const createCustomerRes = await fetch(`${API_BASE_URL}/customers`, {
+    const createCustomerRes = await fetch(`${COMFY_API_BASE_URL}/customers`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -233,7 +241,7 @@ export const useFirebaseAuthStore = defineStore('firebaseAuth', () => {
       customerCreated.value = true
     }
 
-    const response = await fetch(`${API_BASE_URL}/customers/credit`, {
+    const response = await fetch(`${COMFY_API_BASE_URL}/customers/credit`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -245,6 +253,7 @@ export const useFirebaseAuthStore = defineStore('firebaseAuth', () => {
     if (!response.ok) {
       const errorData = await response.json()
       error.value = `Failed to initiate credit purchase: ${errorData.message}`
+      showAuthErrorToast()
       return null
     }
 
@@ -273,7 +282,7 @@ export const useFirebaseAuthStore = defineStore('firebaseAuth', () => {
       return null
     }
 
-    const response = await fetch(`${API_BASE_URL}/customers/billing`, {
+    const response = await fetch(`${COMFY_API_BASE_URL}/customers/billing`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -287,6 +296,7 @@ export const useFirebaseAuthStore = defineStore('firebaseAuth', () => {
     if (!response.ok) {
       const errorData = await response.json()
       error.value = `Failed to access billing portal: ${errorData.message}`
+      showAuthErrorToast()
       return null
     }
 
@@ -301,6 +311,7 @@ export const useFirebaseAuthStore = defineStore('firebaseAuth', () => {
     isInitialized,
     balance,
     lastBalanceUpdateTime,
+    isFetchingBalance,
 
     // Getters
     isAuthenticated,
