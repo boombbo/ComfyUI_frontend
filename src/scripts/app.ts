@@ -674,13 +674,18 @@ export class ComfyApp {
 
     api.addEventListener('execution_error', ({ detail }) => {
       // Check if this is an auth-related error or credits-related error
-      if (detail.exception_message === 'Please login first to use this node.') {
-        useDialogService().showSignInRequiredDialog({ type: 'signIn' })
+      if (
+        detail.exception_message ===
+        'Unauthorized: Please login first to use this node.'
+      ) {
+        useDialogService().showApiNodesSignInDialog([detail.node_type])
       } else if (
         detail.exception_message ===
         'Payment Required: Please add credits to your account to use this node.'
       ) {
-        useDialogService().showSignInRequiredDialog({ type: 'credits' })
+        useDialogService().showTopUpCreditsDialog({
+          isInsufficientCredits: true
+        })
       } else {
         useDialogService().showExecutionErrorDialog(detail)
       }
@@ -1203,7 +1208,9 @@ export class ComfyApp {
 
           const p = await this.graphToPrompt()
           try {
-            const res = await api.queuePrompt(number, p, comfyOrgAuthToken)
+            api.authToken = comfyOrgAuthToken
+            const res = await api.queuePrompt(number, p)
+            delete api.authToken
             executionStore.lastNodeErrors = res.node_errors ?? null
             if (executionStore.lastNodeErrors?.length) {
               this.canvas.draw(true, true)

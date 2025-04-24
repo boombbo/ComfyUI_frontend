@@ -7,6 +7,7 @@ import {
   browserLocalPersistence,
   createUserWithEmailAndPassword,
   onAuthStateChanged,
+  sendPasswordResetEmail,
   setPersistence,
   signInWithEmailAndPassword,
   signInWithPopup,
@@ -18,7 +19,6 @@ import { useFirebaseAuth } from 'vuefire'
 
 import { COMFY_API_BASE_URL } from '@/config/comfyApi'
 import { t } from '@/i18n'
-import { useDialogService } from '@/services/dialogService'
 import { operations } from '@/types/comfyRegistryTypes'
 
 import { useToastStore } from './toastStore'
@@ -226,6 +226,11 @@ export const useFirebaseAuthStore = defineStore('firebaseAuth', () => {
   const logout = async (): Promise<void> =>
     executeAuthAction((authInstance) => signOut(authInstance))
 
+  const sendPasswordReset = async (email: string): Promise<void> =>
+    executeAuthAction((authInstance) =>
+      sendPasswordResetEmail(authInstance, email)
+    )
+
   const addCredits = async (
     requestBodyContent: CreditPurchasePayload
   ): Promise<CreditPurchaseResponse | null> => {
@@ -264,14 +269,6 @@ export const useFirebaseAuthStore = defineStore('firebaseAuth', () => {
     requestBodyContent: CreditPurchasePayload
   ): Promise<CreditPurchaseResponse | null> =>
     executeAuthAction((_) => addCredits(requestBodyContent))
-
-  const openSignInPanel = () => {
-    useDialogService().showSettingsDialog('user')
-  }
-
-  const openCreditsPanel = () => {
-    useDialogService().showSettingsDialog('credits')
-  }
 
   const accessBillingPortal = async (
     requestBody?: AccessBillingPortalReqBody
@@ -326,9 +323,8 @@ export const useFirebaseAuthStore = defineStore('firebaseAuth', () => {
     loginWithGoogle,
     loginWithGithub,
     initiateCreditPurchase,
-    openSignInPanel,
-    openCreditsPanel,
     fetchBalance,
-    accessBillingPortal
+    accessBillingPortal,
+    sendPasswordReset
   }
 })
