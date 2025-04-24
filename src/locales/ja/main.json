@@ -104,18 +104,18 @@
   },
   "credits": {
     "credits": "クレジット",
-    "creditsHistory": "クレジット履歴",
     "faqs": "よくある質問",
+    "invoiceHistory": "請求履歴",
     "lastUpdated": "最終更新",
     "messageSupport": "サポートにメッセージ",
     "purchaseCredits": "クレジットを購入",
     "topUp": {
-      "addCredits": "残高にクレジットを追加",
       "buyNow": "今すぐ購入",
       "insufficientMessage": "このワークフローを実行するのに十分なクレジットがありません。",
       "insufficientTitle": "クレジット不足",
       "maxAmount": "（最大 $1,000 USD）",
-      "title": "クレジット残高を追加"
+      "quickPurchase": "クイック購入",
+      "seeDetails": "詳細を見る"
     },
     "yourCreditBalance": "あなたのクレジット残高"
   },

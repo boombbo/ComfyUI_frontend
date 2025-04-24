@@ -104,18 +104,18 @@
   },
   "credits": {
     "credits": "Crédits",
-    "creditsHistory": "Historique des crédits",
     "faqs": "FAQ",
+    "invoiceHistory": "Historique des factures",
     "lastUpdated": "Dernière mise à jour",
     "messageSupport": "Contacter le support",
     "purchaseCredits": "Acheter des crédits",
     "topUp": {
-      "addCredits": "Ajouter des crédits à votre solde",
       "buyNow": "Acheter maintenant",
       "insufficientMessage": "Vous n'avez pas assez de crédits pour exécuter ce workflow.",
       "insufficientTitle": "Crédits insuffisants",
       "maxAmount": "(Max. 1 000 $ US)",
-      "title": "Ajouter au solde de crédits"
+      "quickPurchase": "Achat rapide",
+      "seeDetails": "Voir les détails"
     },
     "yourCreditBalance": "Votre solde de crédits"
   },
