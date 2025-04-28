@@ -1081,12 +1081,12 @@
     "failedToFetchLogs": "Failed to fetch server logs",
     "migrateToLitegraphReroute": "Reroute nodes will be removed in future versions. Click to migrate to litegraph-native reroute.",
     "userNotAuthenticated": "User not authenticated",
-    "firebaseAuthNotInitialized": "Firebase Auth not initialized",
     "failedToFetchBalance": "Failed to fetch balance: {error}",
     "failedToCreateCustomer": "Failed to create customer: {error}",
     "failedToInitiateCreditPurchase": "Failed to initiate credit purchase: {error}",
     "failedToAccessBillingPortal": "Failed to access billing portal: {error}",
-    "failedToPurchaseCredits": "Failed to purchase credits: {error}"
+    "failedToPurchaseCredits": "Failed to purchase credits: {error}",
+    "unauthorizedDomain": "Your domain {domain} is not authorized to use this service. Please contact {email} to add your domain to the whitelist."
   },
   "auth": {
     "login": {
@@ -1113,7 +1113,8 @@
       "andText": "and",
       "privacyLink": "Privacy Policy",
       "success": "Login successful",
-      "failed": "Login failed"
+      "failed": "Login failed",
+      "insecureContextWarning": "This connection is insecure (HTTP) - your credentials may be intercepted by attackers if you proceed to login."
     },
     "signup": {
       "title": "Create an account",
@@ -1125,7 +1126,8 @@
       "signUpButton": "Sign up",
       "signIn": "Sign in",
       "signUpWithGoogle": "Sign up with Google",
-      "signUpWithGithub": "Sign up with Github"
+      "signUpWithGithub": "Sign up with Github",
+      "regionRestrictionChina": "In accordance with local regulatory requirements, our services are currently unavailable to users located in mainland China."
     },
     "signOut": {
       "signOut": "Log Out",
