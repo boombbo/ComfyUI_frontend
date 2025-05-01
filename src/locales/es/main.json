@@ -37,6 +37,10 @@
       "termsText": "Al hacer clic en \"Siguiente\" o \"Registrarse\", aceptas nuestros",
       "title": "Inicia sesión en tu cuenta"
     },
+    "passwordUpdate": {
+      "success": "Contraseña actualizada",
+      "successDetail": "Tu contraseña se ha actualizado correctamente"
+    },
     "signOut": {
       "signOut": "Cerrar sesión",
       "success": "Sesión cerrada correctamente",
@@ -48,6 +52,7 @@
       "emailPlaceholder": "Ingresa tu correo electrónico",
       "passwordLabel": "Contraseña",
       "passwordPlaceholder": "Ingresa una nueva contraseña",
+      "personalDataConsentLabel": "Acepto el tratamiento de mis datos personales.",
       "regionRestrictionChina": "De acuerdo con los requisitos regulatorios locales, nuestros servicios no están disponibles actualmente para usuarios ubicados en China continental.",
       "signIn": "Iniciar sesión",
       "signUpButton": "Registrarse",
@@ -1150,11 +1155,8 @@
     "name": "Nombre",
     "notSet": "No establecido",
     "provider": "Método de inicio de sesión",
-    "providers": {
-      "github": "GitHub",
-      "google": "Google"
-    },
-    "title": "Configuración de usuario"
+    "title": "Configuración de usuario",
+    "updatePassword": "Actualizar contraseña"
   },
   "validation": {
     "invalidEmail": "Dirección de correo electrónico inválida",
@@ -1169,6 +1171,7 @@
       "special": "Debe contener al menos un carácter especial",
       "uppercase": "Debe contener al menos una letra mayúscula"
     },
+    "personalDataConsentRequired": "Debes aceptar el procesamiento de tus datos personales.",
     "required": "Requerido"
   },
   "welcome": {

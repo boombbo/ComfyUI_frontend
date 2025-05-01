@@ -37,6 +37,10 @@
       "termsText": "点击“下一步”或“注册”即表示您同意我们的",
       "title": "登录您的账户"
     },
+    "passwordUpdate": {
+      "success": "密码已更新",
+      "successDetail": "您的密码已成功更新"
+    },
     "signOut": {
       "signOut": "退出登录",
       "success": "成功退出登录",
@@ -48,6 +52,7 @@
       "emailPlaceholder": "输入您的电子邮件",
       "passwordLabel": "密码",
       "passwordPlaceholder": "输入新密码",
+      "personalDataConsentLabel": "我同意处理我的个人数据。",
       "regionRestrictionChina": "根据当地法规要求，我们暂时无法为中国地区的用户提供服务。",
       "signIn": "登录",
       "signUpButton": "注册",
@@ -1150,11 +1155,8 @@
     "name": "名称",
     "notSet": "未设置",
     "provider": "登录方式",
-    "providers": {
-      "github": "GitHub",
-      "google": "Google"
-    },
-    "title": "用户设置"
+    "title": "用户设置",
+    "updatePassword": "更新密码"
   },
   "validation": {
     "invalidEmail": "无效的电子邮件地址",
@@ -1169,6 +1171,7 @@
       "special": "必须包含至少一个特殊字符",
       "uppercase": "必须包含至少一个大写字母"
     },
+    "personalDataConsentRequired": "您必须同意处理您的个人数据。",
     "required": "必填"
   },
   "welcome": {

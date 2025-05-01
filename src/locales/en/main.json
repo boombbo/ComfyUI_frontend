@@ -1128,12 +1128,17 @@
       "signIn": "Sign in",
       "signUpWithGoogle": "Sign up with Google",
       "signUpWithGithub": "Sign up with Github",
-      "regionRestrictionChina": "In accordance with local regulatory requirements, our services are temporarily unavailable to users located in China."
+      "regionRestrictionChina": "In accordance with local regulatory requirements, our services are temporarily unavailable to users located in China.",
+      "personalDataConsentLabel": "I agree to the processing of my personal data."
     },
     "signOut": {
       "signOut": "Log Out",
       "success": "Signed out successfully",
       "successDetail": "You have been signed out of your account."
+    },
+    "passwordUpdate": {
+      "success": "Password Updated",
+      "successDetail": "Your password has been updated successfully"
     }
   },
   "validation": {
@@ -1149,7 +1154,8 @@
       "number": "Must contain at least one number",
       "special": "Must contain at least one special character",
       "match": "Passwords must match"
-    }
+    },
+    "personalDataConsentRequired": "You must agree to the processing of your personal data."
   },
   "credits": {
     "credits": "Credits",
@@ -1173,11 +1179,8 @@
     "title": "User Settings",
     "name": "Name",
     "email": "Email",
+    "provider": "Sign-in Provider",
     "notSet": "Not set",
-    "provider": "Sign in method",
-    "providers": {
-      "google": "Google",
-      "github": "GitHub"
-    }
+    "updatePassword": "Update Password"
   }
 }

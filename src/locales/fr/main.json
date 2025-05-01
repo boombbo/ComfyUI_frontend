@@ -37,6 +37,10 @@
       "termsText": "En cliquant sur \"Suivant\" ou \"S'inscrire\", vous acceptez nos",
       "title": "Connectez-vous à votre compte"
     },
+    "passwordUpdate": {
+      "success": "Mot de passe mis à jour",
+      "successDetail": "Votre mot de passe a été mis à jour avec succès"
+    },
     "signOut": {
       "signOut": "Se déconnecter",
       "success": "Déconnexion réussie",
@@ -48,6 +52,7 @@
       "emailPlaceholder": "Entrez votre email",
       "passwordLabel": "Mot de passe",
       "passwordPlaceholder": "Entrez un nouveau mot de passe",
+      "personalDataConsentLabel": "J'accepte le traitement de mes données personnelles.",
       "regionRestrictionChina": "Conformément aux exigences réglementaires locales, nos services ne sont actuellement pas disponibles pour les utilisateurs situés en Chine continentale.",
       "signIn": "Se connecter",
       "signUpButton": "S'inscrire",
@@ -1150,11 +1155,8 @@
     "name": "Nom",
     "notSet": "Non défini",
     "provider": "Méthode de connexion",
-    "providers": {
-      "github": "GitHub",
-      "google": "Google"
-    },
-    "title": "Paramètres utilisateur"
+    "title": "Paramètres utilisateur",
+    "updatePassword": "Mettre à jour le mot de passe"
   },
   "validation": {
     "invalidEmail": "Adresse e-mail invalide",
@@ -1169,6 +1171,7 @@
       "special": "Doit contenir au moins un caractère spécial",
       "uppercase": "Doit contenir au moins une lettre majuscule"
     },
+    "personalDataConsentRequired": "Vous devez accepter le traitement de vos données personnelles.",
     "required": "Requis"
   },
   "welcome": {
