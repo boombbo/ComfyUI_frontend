@@ -15,6 +15,7 @@
 <script setup lang="ts">
 import { createBounds } from '@comfyorg/litegraph'
 import type { LGraphCanvas } from '@comfyorg/litegraph'
+import { whenever } from '@vueuse/core'
 import { ref, watch } from 'vue'
 
 import { useAbsolutePosition } from '@/composables/element/useAbsolutePosition'
@@ -62,20 +63,10 @@ watch(
   { immediate: true }
 )
 
-watch(
-  () => {
-    const canvas = canvasStore.canvas
-    if (!canvas) return null
-    return {
-      scale: canvas.ds.state.scale,
-      offset: [canvas.ds.state.offset[0], canvas.ds.state.offset[1]]
-    }
-  },
-  (state) => {
-    if (!state) return
-
-    positionSelectionOverlay(canvasStore.canvas as LGraphCanvas)
-  }
+whenever(
+  () => canvasStore.getCanvas().ds.state,
+  () => positionSelectionOverlay(canvasStore.getCanvas()),
+  { deep: true }
 )
 
 watch(
